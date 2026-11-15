@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { config, require_ } from "./config.js";
+import { ccAgent, ccJSON } from "./claude-code.js";
 
 let client: Anthropic | null = null;
 function ai() {
@@ -37,9 +38,13 @@ export async function runAgent(opts: {
   prompt: string;
   tools: Tool[];
   budget: Budget;
+  /** Carpeta del proyecto (obligatoria con el motor claude-code, que usa sus propias herramientas). */
+  cwd: string;
   maxTurns?: number;
   log?: (msg: string) => void;
 }): Promise<string> {
+  if (config.engine === "claude-code")
+    return ccAgent({ model: opts.model, system: opts.system, prompt: opts.prompt, cwd: opts.cwd, budget: opts.budget, log: opts.log });
   const { model, system, tools, budget, maxTurns = 80, log = () => {} } = opts;
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: opts.prompt }];
   const byName = new Map(tools.map((t) => [t.name, t]));
@@ -88,6 +93,7 @@ export async function askJSON<T>(opts: {
   schema: Record<string, unknown>;
   budget: Budget;
 }): Promise<T> {
+  if (config.engine === "claude-code") return ccJSON<T>(opts);
   const res = await ai().messages.create({
     model: opts.model,
     max_tokens: 32_000,

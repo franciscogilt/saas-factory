@@ -3,11 +3,24 @@ import { resolve } from "node:path";
 
 const env = (k: string, d?: string) => process.env[k] ?? d;
 
+/**
+ * Motor de IA:
+ *  - "claude-code" (por defecto): usa tu sesión de Claude Code (Pro/Max/Team) con `claude -p`. Sin clave de API.
+ *    En tu computadora basta con haber hecho `claude` → login. En GitHub Actions usa CLAUDE_CODE_OAUTH_TOKEN
+ *    (generado con `claude setup-token`).
+ *  - "api": usa ANTHROPIC_API_KEY y se cobra por tokens en la Claude Console.
+ */
+// Siempre tu sesión de Claude Code, salvo que pidas ENGINE=api expresamente.
+const engine = (env("ENGINE") === "api" ? "api" : "claude-code") as "claude-code" | "api";
+
 export const config = {
+  engine,
   anthropicKey: env("ANTHROPIC_API_KEY"),
+  claudeBin: env("CLAUDE_BIN", "claude")!,
+  // Con claude-code, si no defines modelos se usa el predeterminado de tu plan.
   models: {
-    strategy: env("MODEL_STRATEGY", "claude-opus-5-5")!,
-    engineer: env("MODEL_ENGINEER", "claude-sonnet-5-5")!,
+    strategy: env("MODEL_STRATEGY", engine === "api" ? "claude-opus-5-5" : "")!,
+    engineer: env("MODEL_ENGINEER", engine === "api" ? "claude-sonnet-5-5" : "")!,
   },
   maxTokensPerProject: Number(env("MAX_TOKENS_PER_PROJECT", "8000000")),
   maxQaRounds: Number(env("MAX_QA_ROUNDS", "8")),

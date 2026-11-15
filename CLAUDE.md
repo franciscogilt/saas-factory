@@ -2,7 +2,7 @@
 
 Este repositorio es la fábrica de SaaS de Francisco. Contiene:
 
-- `src/` — la fábrica autónoma (CLI `npm run factory -- …`): agentes ideador, PM, arquitecto, ingeniero, revisor, crecimiento y QA, más el despliegue a GitHub, Supabase, Stripe y Vercel. Necesita claves en `.env` (ver `.env.example`).
+- `src/` — la fábrica autónoma (CLI `npm run factory -- …`): agentes ideador, PM, arquitecto, ingeniero, revisor, crecimiento y QA, más el despliegue a GitHub, Supabase, Stripe y Vercel. Para la IA usa la sesión de Claude Code del usuario (`ENGINE=claude-code`, por defecto; `src/claude-code.ts`): **nunca le pidas una clave de API de Anthropic**. Para publicar necesita claves de GitHub, Vercel, Supabase y Stripe en `.env` (ver `.env.example`).
 - `template/` — plantilla base de cada SaaS: Next.js 15 + Supabase + Stripe + Tailwind v4. Lee `template/CONVENTIONS.md` antes de tocarla.
 - `generated/<slug>/` — SaaS ya construidos y probados, listos para `factory deploy`. Ver `generated/README.md`.
 - `tools/supabase-mock.mjs` — Supabase simulado (Auth + PostgREST) sobre Postgres embebido con RLS real, para probar sin cuenta.
@@ -37,4 +37,4 @@ Si un error de prueba viene de la prueba y no de la app, dilo así; no "arregles
 
 ## Cosas que solo puede hacer el usuario
 
-Crear cuentas, poner tarjetas y pegar claves (Anthropic, GitHub, Vercel, Supabase, Stripe). Nunca pidas que pegue claves en el chat: van en GitHub → Settings → Secrets, o en su `.env` local.
+Crear cuentas, poner tarjetas, iniciar sesión en Claude Code o generar `CLAUDE_CODE_OAUTH_TOKEN` con `claude setup-token`, y pegar claves (GitHub, Vercel, Supabase, Stripe). Nunca pidas que pegue claves en el chat: van en GitHub → Settings → Secrets, o en su `.env` local.

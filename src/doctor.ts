@@ -1,4 +1,6 @@
 import { config } from "./config.js";
+import { ccPing } from "./claude-code.js";
+import { Budget } from "./llm.js";
 
 type Check = { name: string; ok: boolean; detail: string };
 
@@ -19,14 +21,22 @@ export async function doctor(aiOnly = false): Promise<boolean> {
     }
   };
 
-  await run("Claude (ANTHROPIC_API_KEY)", config.anthropicKey, "Créala en console.anthropic.com → API Keys", async () => {
-    const r = await get("https://api.anthropic.com/v1/models?limit=1000", { "x-api-key": config.anthropicKey!, "anthropic-version": "2023-06-01" });
-    if (!r.ok) throw new Error(`Clave rechazada (${r.status})`);
-    const ids: string[] = (r.body.data ?? []).map((m: any) => m.id);
-    for (const m of [config.models.strategy, config.models.engineer])
-      if (ids.length && !ids.includes(m)) throw new Error(`El modelo ${m} no está disponible en tu cuenta`);
-    return "válida";
-  });
+  if (config.engine === "claude-code") {
+    await run("Claude (tu sesión de Claude Code)", "sesión", "Instala Claude Code (`npm i -g @anthropic-ai/claude-code`) y entra con `claude` usando tu plan. En GitHub Actions: secreto CLAUDE_CODE_OAUTH_TOKEN (genéralo con `claude setup-token`)", async () => {
+      const answer = await ccPing(new Budget(1_000_000));
+      if (!/ok/i.test(answer)) throw new Error(`Respuesta inesperada: ${answer.slice(0, 80)}`);
+      return `sesión activa · sin clave de API${process.env.ANTHROPIC_API_KEY ? " (ANTHROPIC_API_KEY está definida pero se ignora con ENGINE=claude-code)" : ""}`;
+    });
+  } else {
+    await run("Claude (ANTHROPIC_API_KEY)", config.anthropicKey, "Créala en console.anthropic.com → API Keys, o quítala para usar tu sesión de Claude Code", async () => {
+      const r = await get("https://api.anthropic.com/v1/models?limit=1000", { "x-api-key": config.anthropicKey!, "anthropic-version": "2023-06-01" });
+      if (!r.ok) throw new Error(`Clave rechazada (${r.status})`);
+      const ids: string[] = (r.body.data ?? []).map((m: any) => m.id);
+      for (const m of [config.models.strategy, config.models.engineer])
+        if (m && ids.length && !ids.includes(m)) throw new Error(`El modelo ${m} no está disponible en tu cuenta`);
+      return "válida";
+    });
+  }
 
   if (aiOnly) return report(checks);
 

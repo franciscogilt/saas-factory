@@ -144,6 +144,7 @@ export async function implementTask(prd: PRD, task: Task, root: string, budget: 
     model: config.models.engineer,
     system: ENGINEER_SYSTEM(conventions),
     tools: projectTools(root),
+    cwd: root,
     budget,
     log,
     prompt:
@@ -169,6 +170,7 @@ export async function reviewCode(prd: PRD, root: string, budget: Budget, log: (m
       `6. Textos de relleno (lorem ipsum, "TODO", "Mi SaaS").\n` +
       `No reescribas lo que funciona. Termina con "npm run typecheck" en verde y un resumen de los cambios.`,
     tools: projectTools(root),
+    cwd: root,
     budget,
     log,
     prompt: `Revisa el SaaS "${prd.name}". El PRD está en docs/PRD.md. Funcionalidades esperadas:\n` +
@@ -264,6 +266,7 @@ export async function qaLoop(prd: PRD, root: string, budget: Budget, log: (m: st
       model: config.models.engineer,
       system: ENGINEER_SYSTEM(conventions),
       tools: projectTools(root),
+    cwd: root,
       budget,
       log,
       prompt:

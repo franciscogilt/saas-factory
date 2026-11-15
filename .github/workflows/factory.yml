@@ -1,6 +1,8 @@
 # Fábrica en piloto automático: cada lunes lanza nuevos SaaS sin que hagas nada.
 # Configura en Settings → Secrets and variables → Actions:
-#   Secrets:   ANTHROPIC_API_KEY, FACTORY_GITHUB_TOKEN, VERCEL_TOKEN, SUPABASE_ACCESS_TOKEN, STRIPE_SECRET_KEY
+#   Secrets:   CLAUDE_CODE_OAUTH_TOKEN (tu plan de Claude, sin clave de API: genéralo con `claude setup-token`),
+#              FACTORY_GITHUB_TOKEN, VERCEL_TOKEN, SUPABASE_ACCESS_TOKEN, STRIPE_SECRET_KEY
+#   (Opcional: ANTHROPIC_API_KEY + variable FACTORY_ENGINE=api si prefieres pagar por tokens.)
 #   Variables: FACTORY_NICHE, FACTORY_GITHUB_OWNER, SUPABASE_ORG_ID (y VERCEL_TEAM_ID si usas equipo)
 name: SaaS Factory
 
@@ -28,7 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 340
     env:
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ENGINE: ${{ vars.FACTORY_ENGINE || 'claude-code' }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ vars.FACTORY_ENGINE == 'api' && secrets.ANTHROPIC_API_KEY || '' }}
       GITHUB_TOKEN: ${{ secrets.FACTORY_GITHUB_TOKEN }}
       GITHUB_OWNER: ${{ vars.FACTORY_GITHUB_OWNER }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -42,6 +46,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - name: Instalar Claude Code
+        if: ${{ vars.FACTORY_ENGINE != 'api' }}
+        run: npm install -g @anthropic-ai/claude-code
 
       - name: Revisar claves
         run: npm run -s factory -- doctor ${{ inputs.mode == 'probar-sin-publicar' && '--ai-only' || '' }}
