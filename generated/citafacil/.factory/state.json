@@ -1,0 +1,122 @@
+{
+  "slug": "citafacil",
+  "idea": "CitaFácil: Un enlace de reservas que el negocio pone en su Instagram y WhatsApp: los clientes eligen servicio, día y hora libres sin escribir; el negocio ve su agenda en un panel y envía recordatorios por WhatsApp con un toque.",
+  "stage": "deploy",
+  "tokensUsed": 0,
+  "prd": {
+    "name": "CitaFácil",
+    "slug": "citafacil",
+    "tagline": "Reservas online para salones y barberías",
+    "problem": "Los salones de belleza y barberías gestionan las citas por WhatsApp y llamadas: pierden tiempo respondiendo mensajes, se les olvidan citas, hay clientes que no llegan y huecos vacíos en la agenda.",
+    "targetCustomer": "Dueños de salones de belleza, barberías, spas de uñas y estilistas independientes en Latinoamérica (inicialmente República Dominicana), con 1-5 empleados y sin sistema de reservas.",
+    "valueProposition": "Un enlace de reservas que el negocio pone en su Instagram y WhatsApp: los clientes eligen servicio, día y hora libres sin escribir; el negocio ve su agenda en un panel y envía recordatorios por WhatsApp con un toque.",
+    "coreFeatures": [
+      {
+        "title": "Enlace de reservas propio",
+        "description": "Una página pública con tus servicios, precios y horarios libres. Tus clientes reservan solos, 24/7, sin escribirte."
+      },
+      {
+        "title": "Agenda del día",
+        "description": "Ve de un vistazo las citas de hoy y los próximos días, márcalas como completadas o cancélalas."
+      },
+      {
+        "title": "Recordatorios por WhatsApp",
+        "description": "Envía a cada cliente un recordatorio ya redactado con un solo toque, desde tu propio WhatsApp."
+      },
+      {
+        "title": "Servicios y horarios",
+        "description": "Define tus servicios con duración y precio, tus días y horas de trabajo. Nunca habrá dos citas a la vez."
+      }
+    ],
+    "plans": [
+      {
+        "id": "free",
+        "name": "Gratis",
+        "priceUsd": 0,
+        "features": [
+          "Hasta 30 reservas al mes",
+          "Enlace de reservas",
+          "Recordatorios por WhatsApp"
+        ]
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "priceUsd": 12,
+        "features": [
+          "Reservas ilimitadas",
+          "Sin la marca CitaFácil en tu página",
+          "Soporte prioritario por WhatsApp"
+        ]
+      }
+    ],
+    "dataModel": "businesses (user_id único, slug público, nombre, WhatsApp, zona horaria, horario y días de apertura, intervalo de turnos); services (business_id, nombre, duración, precio, activo); appointments (business_id, service_id, nombre y teléfono del cliente, inicio, fin, estado). RLS por user_id; lectura pública de negocios y servicios activos; reservas públicas solo mediante la función book_appointment (valida horario, solapes y límite del plan).",
+    "landingCopy": {
+      "headline": "Tus clientes reservan solos. Tú solo atiendes.",
+      "subheadline": "Comparte un enlace en tu Instagram y WhatsApp: tus clientes eligen servicio y hora libre, y tú recibes la cita en tu agenda. Gratis para empezar.",
+      "cta": "Crear mi enlace gratis"
+    }
+  },
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Modelo de datos con RLS y reservas públicas seguras",
+      "details": "0002_bookings.sql",
+      "files": [
+        "supabase/migrations/0002_bookings.sql"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Configuración del negocio",
+      "details": "",
+      "files": [
+        "app/dashboard/settings/page.tsx"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Servicios",
+      "details": "",
+      "files": [
+        "app/dashboard/services/page.tsx"
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Agenda y recordatorios por WhatsApp",
+      "details": "",
+      "files": [
+        "app/dashboard/appointments/page.tsx"
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Resumen del panel",
+      "details": "",
+      "files": [
+        "app/dashboard/page.tsx"
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Página pública de reservas",
+      "details": "",
+      "files": [
+        "app/r/[slug]/page.tsx"
+      ]
+    }
+  ],
+  "doneTasks": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+  ],
+  "qaRounds": 0,
+  "deploy": {},
+  "createdAt": "2026-11-15T19:39:39.607465Z",
+  "updatedAt": "2026-11-15T19:39:39.607465Z"
+}

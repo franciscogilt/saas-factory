@@ -180,7 +180,7 @@ export async function personalize(root: string, prd: PRD) {
 export async function writeGrowthFiles(root: string, posts: Post[], launch: Launch) {
   const day = 86_400_000;
   const data = posts.map((p, i) => ({
-    slug: slugify(p.slug) || `articulo-${i + 1}`,
+    slug: slugify(p.slug, 80) || `articulo-${i + 1}`,
     title: p.title,
     description: p.description,
     date: new Date(Date.now() - i * 7 * day).toISOString().slice(0, 10),

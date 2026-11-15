@@ -1,5 +1,7 @@
 # 🏭 SaaS Factory
 
+> **Primer SaaS listo:** [CitaFácil](generated/citafacil/), reservas online para salones y barberías. Ya está construido y probado; solo falta publicarlo. Ver [generated/](generated/).
+
 Una fábrica de software autónoma: le das un nicho o una idea y un equipo de agentes de IA (Claude) diseña, programa, prueba y **despliega** un SaaS completo con login, base de datos y cobros por suscripción.
 
 ```

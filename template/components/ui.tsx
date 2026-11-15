@@ -42,14 +42,17 @@ export function Input(props: ComponentProps<"input">) {
 export function Navbar({ signedIn }: { signedIn: boolean }) {
   return (
     <header className="border-b border-zinc-100">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-4">
         <Link href="/" className="text-lg font-bold tracking-tight">{product.name}</Link>
         <div className="flex items-center gap-2">
           <LinkButton href="/pricing" variant="ghost">Precios</LinkButton>
           {signedIn ? (
             <LinkButton href="/dashboard">Panel</LinkButton>
           ) : (
-            <LinkButton href="/login">{product.cta}</LinkButton>
+            <LinkButton href="/login">
+              <span className="sm:hidden">Empezar</span>
+              <span className="hidden sm:inline">{product.cta}</span>
+            </LinkButton>
           )}
         </div>
       </nav>

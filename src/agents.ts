@@ -184,6 +184,8 @@ export async function writeGrowth(prd: PRD, budget: Budget): Promise<{ posts: Po
   const system =
     "Eres un growth marketer experto en SEO y lanzamientos de micro-SaaS sin presupuesto. Escribes en el idioma del cliente objetivo, " +
     "con tono humano y útil, sin exageraciones ni promesas falsas, sin inventar estadísticas, testimonios ni clientes. " +
+    "NUNCA escribas experiencias personales del fundador en primera persona (\"hablé con 10 clientes\", \"mi familia tiene…\"): " +
+    "en su lugar deja un hueco entre corchetes, p. ej. [Cuenta aquí tu experiencia real], para que el fundador lo complete. " +
     "El contenido debe aportar valor por sí mismo y mencionar el producto solo donde encaja de forma natural.";
   const ctx = `Producto: ${prd.name} — ${prd.tagline}\nCliente: ${prd.targetCustomer}\nProblema: ${prd.problem}\nPropuesta: ${prd.valueProposition}\n` +
     `Funciones: ${prd.coreFeatures.map((f) => f.title).join(", ")}\nPrecios: ${prd.plans.map((p) => `${p.name} $${p.priceUsd}`).join(", ")}`;

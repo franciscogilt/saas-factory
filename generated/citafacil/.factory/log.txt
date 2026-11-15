@@ -1,0 +1,1 @@
+[19:39:39] [citafacil] Construido a mano por Claude siguiendo el proceso de la fábrica. 31 pruebas SQL + 25 E2E + 9 smoke en verde.
