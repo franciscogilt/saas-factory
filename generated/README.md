@@ -5,13 +5,14 @@ SaaS ya construidos y probados, listos para publicar con la fábrica.
 | SaaS | Qué es | Estado |
 |---|---|---|
 | [CitaFácil](citafacil/) | Reservas online para salones y barberías, con recordatorios por WhatsApp | ✅ Probado · listo para publicar |
+| [MenúFácil](menufacil/) | Menú digital con QR y pedidos por WhatsApp para restaurantes y cafeterías | ✅ Probado · listo para publicar |
 
 ## Publicar uno
 
 Con las claves en tu `.env` (comprueba con `npm run factory -- doctor`):
 
 ```bash
-cp -r generated/citafacil projects/
+cp -r generated/citafacil projects/      # o menufacil
 npm run factory -- deploy citafacil
 ```
 

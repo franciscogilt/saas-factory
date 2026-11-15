@@ -10,6 +10,8 @@
 - `lib/supabase/admin.ts` → cliente con service role (solo en servidor, solo para webhooks/tareas de sistema).
 - `lib/subscription.ts` → `getSubscription(userId)` y `getUserPlan()` para limitar funciones por plan.
 - `components/ui.tsx` — `Button`, `LinkButton`, `Card`, `Input`, `Navbar`.
+- `components/flash.tsx` — `Flash` (mensajes `?ok=` / `?error=` tras una Server Action que redirige), `SubmitButton` y `selectCls`. Patrón: la acción valida, hace `redirect('/ruta?error=...')` y la página muestra `<Flash ok={ok} error={error} />`.
+- `components/copy-link.tsx` — `CopyLink` para copiar un enlace público.
 - `components/legal.tsx` — `Footer` (enlaces a precios/términos/privacidad) y `LegalPage`. Toda página pública debe terminar con `<Footer />`.
 - Blog: `/blog` y `/blog/[slug]` leen `lib/posts.ts` (lo escribe el agente de crecimiento). No lo edites a mano.
 - Ya existen y no hay que recrearlas: `/blog`, `/terms`, `/privacy`, `/sitemap.xml`, `/robots.txt`, imagen OpenGraph y página 404. Si añades páginas públicas, agrégalas a `app/sitemap.ts`.

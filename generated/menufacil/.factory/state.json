@@ -1,0 +1,123 @@
+{
+  "slug": "menufacil",
+  "idea": "MenúFácil: Un menú online siempre actualizado, con su código QR para la mesa o el mostrador. El cliente arma su pedido en el móvil y lo envía por WhatsApp ya ordenado, con cantidades, total y dirección. Sin comisiones por pedido.",
+  "stage": "deploy",
+  "tokensUsed": 0,
+  "prd": {
+    "name": "MenúFácil",
+    "slug": "menufacil",
+    "tagline": "Menú digital con QR y pedidos por WhatsApp",
+    "problem": "Restaurantes pequeños, cafeterías, food trucks y colmados reciben pedidos por WhatsApp de forma desordenada: el cliente pregunta qué hay y cuánto cuesta, se pierden detalles del pedido y el menú impreso queda desactualizado cada vez que cambia un precio.",
+    "targetCustomer": "Dueños de restaurantes pequeños, cafeterías, food trucks, pica pollos y colmados en Latinoamérica (inicialmente República Dominicana) que ya venden por WhatsApp y no tienen web ni app de pedidos.",
+    "valueProposition": "Un menú online siempre actualizado, con su código QR para la mesa o el mostrador. El cliente arma su pedido en el móvil y lo envía por WhatsApp ya ordenado, con cantidades, total y dirección. Sin comisiones por pedido.",
+    "coreFeatures": [
+      {
+        "title": "Menú siempre al día",
+        "description": "Cambia precios, añade platos o marca algo como agotado desde tu móvil. Tus clientes lo ven al instante."
+      },
+      {
+        "title": "Código QR para imprimir",
+        "description": "Descarga tu QR listo para poner en las mesas, el mostrador o la puerta."
+      },
+      {
+        "title": "Pedidos ordenados por WhatsApp",
+        "description": "El cliente elige, y te llega un mensaje con cada producto, cantidad, total, nombre y dirección. Sin errores ni idas y vueltas."
+      },
+      {
+        "title": "Sin comisiones",
+        "description": "Los pedidos llegan directo a tu WhatsApp. No pagas un porcentaje por cada venta."
+      }
+    ],
+    "plans": [
+      {
+        "id": "free",
+        "name": "Gratis",
+        "priceUsd": 0,
+        "features": [
+          "Hasta 25 productos",
+          "Código QR",
+          "Pedidos por WhatsApp"
+        ]
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "priceUsd": 9,
+        "features": [
+          "Productos ilimitados",
+          "Sin la marca MenúFácil en tu menú",
+          "Soporte prioritario por WhatsApp"
+        ]
+      }
+    ],
+    "dataModel": "restaurants (user_id único, slug público, nombre, WhatsApp, moneda, dirección, abierto/cerrado, delivery y recogida, costo de delivery, pedido mínimo); categories (restaurant_id, nombre, posición); products (category_id, nombre, descripción, precio, disponible, posición). RLS por user_id; lectura pública del menú. Límite de 25 productos en el plan gratis aplicado en la base de datos.",
+    "landingCopy": {
+      "headline": "Tu menú en el móvil de tus clientes. Los pedidos, en tu WhatsApp.",
+      "subheadline": "Crea tu menú digital con código QR en 5 minutos. Tus clientes eligen y te envían el pedido completo por WhatsApp, sin comisiones.",
+      "cta": "Crear mi menú gratis"
+    }
+  },
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Modelo de datos con RLS y límite del plan gratis",
+      "details": "",
+      "files": [
+        "supabase/migrations/0002_menu.sql"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Ajustes del negocio",
+      "details": "",
+      "files": [
+        "app/dashboard/settings/page.tsx"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Gestión del menú",
+      "details": "",
+      "files": [
+        "app/dashboard/menu/page.tsx"
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Código QR imprimible",
+      "details": "",
+      "files": [
+        "app/dashboard/qr/page.tsx"
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Resumen del panel",
+      "details": "",
+      "files": [
+        "app/dashboard/page.tsx"
+      ]
+    },
+    {
+      "id": "6",
+      "title": "Menú público con carrito y pedido por WhatsApp",
+      "details": "",
+      "files": [
+        "app/m/[slug]/page.tsx",
+        "app/m/[slug]/menu-client.tsx"
+      ]
+    }
+  ],
+  "doneTasks": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+  ],
+  "qaRounds": 0,
+  "deploy": {},
+  "createdAt": "2026-11-15T21:57:04.970537Z",
+  "updatedAt": "2026-11-15T21:57:04.970537Z"
+}

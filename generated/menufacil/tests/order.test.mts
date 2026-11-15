@@ -1,0 +1,13 @@
+import { orderMessage, totals, whatsappLink, money } from "../lib/order.ts";
+const eq = (a: any, b: any, m: string) => console.log(a === b ? "✓" : "✗", m, a === b ? "" : `\n   got: ${a}\n   exp: ${b}`);
+const r = { name: "Pica Pollo Ana", currency: "DOP", delivery_fee: 100 };
+const lines = [{ id: "1", name: "Pica pollo 2 piezas", price: 250, qty: 2 }, { id: "2", name: "Refresco", price: 75.5, qty: 1 }];
+eq(money(1234.5, "DOP"), "RD$1,234.50", "formato RD$");
+eq(JSON.stringify(totals(lines, "delivery", 100)), JSON.stringify({ subtotal: 575.5, delivery: 100, total: 675.5 }), "totales con delivery");
+eq(totals(lines, "pickup", 100).total, 575.5, "recoger no cobra delivery");
+eq(totals([{ id: "x", name: "a", price: 0.1, qty: 3 }], "pickup", 0).total, 0.3, "sin errores de redondeo (0.1×3)");
+const msg = orderMessage({ restaurant: r, lines, mode: "delivery", customer: " Juan ", address: "Calle 5 #12, Naco", note: "sin cebolla" });
+console.log("---\n" + msg + "\n---");
+eq(msg.includes("2 × Pica pollo 2 piezas — RD$500") && msg.includes("*Total: RD$675.50*") && msg.includes("Delivery a: Calle 5 #12, Naco") && msg.includes("📝 sin cebolla") && msg.includes("👤 Juan"), true, "mensaje completo");
+eq(orderMessage({ restaurant: r, lines, mode: "pickup", customer: "Ana" }).includes("Delivery:"), false, "recoger no muestra delivery");
+eq(whatsappLink("809-555-1234", "hola"), "https://wa.me/18095551234?text=hola", "número RD con prefijo 1");

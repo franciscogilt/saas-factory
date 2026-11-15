@@ -1,0 +1,1 @@
+[21:57:04] [menufacil] Construido a mano por Claude siguiendo el proceso de la fábrica. 23 SQL + 7 pedido + 26 E2E + 9 smoke en verde.
