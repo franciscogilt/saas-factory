@@ -126,7 +126,8 @@ program
 program
   .command("doctor")
   .description("Comprueba que todas las claves están bien configuradas")
-  .action(async () => { if (!(await doctor())) process.exit(1); });
+  .option("--ai-only", "solo la clave de Claude (para el modo de prueba sin publicar)")
+  .action(async (o) => { if (!(await doctor(o.aiOnly))) process.exit(1); });
 
 program
   .command("dashboard")

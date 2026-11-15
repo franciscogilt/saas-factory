@@ -60,7 +60,7 @@ Sube la fábrica a un repositorio de GitHub y el workflow `.github/workflows/fac
 - **Secrets:** `ANTHROPIC_API_KEY`, `FACTORY_GITHUB_TOKEN`, `VERCEL_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `STRIPE_SECRET_KEY`
 - **Variables:** `FACTORY_NICHE`, `FACTORY_GITHUB_OWNER`, `SUPABASE_ORG_ID` (y `VERCEL_TEAM_ID` si usas equipo)
 
-También puedes lanzarlo a mano desde la pestaña *Actions → SaaS Factory → Run workflow*. Elige **solo-revisar-claves** la primera vez para comprobar la configuración sin gastar nada. Al terminar, cada ejecución muestra un informe con los SaaS lanzados y sus enlaces. El estado y los registros de cada ejecución quedan guardados 90 días como artefacto.
+También puedes lanzarlo a mano desde la pestaña *Actions → SaaS Factory → Run workflow*. Elige **solo-revisar-claves** para comprobar la configuración sin gastar nada, o **probar-sin-publicar** para generar un SaaS completo usando solo la clave de Claude (el código queda para descargar en la ejecución, sección *Artifacts*). Al terminar, cada ejecución muestra un informe con los SaaS lanzados y sus enlaces. El estado y los registros de cada ejecución quedan guardados 90 días como artefacto.
 
 Cada proyecto vive en `projects/<slug>/` con su estado en `.factory/state.json` y el registro completo en `.factory/log.txt`. Si se corta la luz o falla una API, `resume` continúa desde la última etapa guardada, sin repetir trabajo ni gastar tokens de más.
 

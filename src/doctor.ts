@@ -8,7 +8,7 @@ async function get(url: string, headers: Record<string, string>) {
 }
 
 /** Comprueba que cada clave existe, es válida y tiene los permisos necesarios. */
-export async function doctor(): Promise<boolean> {
+export async function doctor(aiOnly = false): Promise<boolean> {
   const checks: Check[] = [];
   const run = async (name: string, value: string | undefined, how: string, fn: () => Promise<string>) => {
     if (!value) return checks.push({ name, ok: false, detail: `Falta. ${how}` });
@@ -27,6 +27,8 @@ export async function doctor(): Promise<boolean> {
       if (ids.length && !ids.includes(m)) throw new Error(`El modelo ${m} no está disponible en tu cuenta`);
     return "válida";
   });
+
+  if (aiOnly) return report(checks);
 
   await run("GitHub (GITHUB_TOKEN / GITHUB_OWNER)", config.github.token && config.github.owner, "Token clásico en github.com/settings/tokens con permisos repo y workflow", async () => {
     const r = await get("https://api.github.com/user", { Authorization: `Bearer ${config.github.token}` });
@@ -59,6 +61,10 @@ export async function doctor(): Promise<boolean> {
     return config.stripe.key!.startsWith("sk_live") ? "⚠️ MODO LIVE: cobrará dinero real" : "modo test";
   });
 
+  return report(checks);
+}
+
+function report(checks: Check[]) {
   console.log("\n🩺 Revisión de la fábrica\n");
   for (const c of checks) console.log(`${c.ok ? "✅" : "❌"} ${c.name}\n   ${c.detail}`);
   const ok = checks.every((c) => c.ok);

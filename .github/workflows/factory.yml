@@ -12,7 +12,7 @@ on:
       mode:
         description: "Qué hacer"
         type: choice
-        options: [lanzar, solo-revisar-claves]
+        options: [lanzar, probar-sin-publicar, solo-revisar-claves]
         default: lanzar
       niche:
         description: "Nicho (vacío = usa la variable FACTORY_NICHE)"
@@ -44,7 +44,7 @@ jobs:
       - run: npm ci
 
       - name: Revisar claves
-        run: npm run -s factory -- doctor
+        run: npm run -s factory -- doctor ${{ inputs.mode == 'probar-sin-publicar' && '--ai-only' || '' }}
 
       - name: Ejecutar la fábrica
         if: ${{ inputs.mode != 'solo-revisar-claves' }}
@@ -55,7 +55,11 @@ jobs:
           if [ -z "$NICHE" ]; then echo "::error::Define la variable FACTORY_NICHE o escribe un nicho al lanzar."; exit 1; fi
           git config --global user.email "factory@saas.local"
           git config --global user.name "SaaS Factory"
-          npm run -s factory -- auto "$NICHE" -n "$COUNT"
+          if [ "${{ inputs.mode }}" = "probar-sin-publicar" ]; then
+            npm run -s factory -- auto "$NICHE" -n 1 --no-deploy
+          else
+            npm run -s factory -- auto "$NICHE" -n "$COUNT"
+          fi
 
       - name: Informe
         if: always()
@@ -71,3 +75,21 @@ jobs:
             projects/*/docs/
           if-no-files-found: ignore
           retention-days: 90
+
+      - name: Empaquetar código generado (modo prueba)
+        if: ${{ always() && inputs.mode == 'probar-sin-publicar' }}
+        run: |
+          mkdir -p out
+          for d in projects/*/; do
+            [ -d "$d" ] && (cd projects && zip -qr "../out/$(basename "$d").zip" "$(basename "$d")" -x "*/node_modules/*" "*/.next/*")
+          done
+          ls out || true
+
+      - name: Subir código generado
+        if: ${{ always() && inputs.mode == 'probar-sin-publicar' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: saas-generado-${{ github.run_id }}
+          path: out/*.zip
+          if-no-files-found: ignore
+          retention-days: 30
