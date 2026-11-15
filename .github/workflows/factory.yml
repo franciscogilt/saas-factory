@@ -1,13 +1,19 @@
 # Fábrica en piloto automático: cada lunes lanza nuevos SaaS sin que hagas nada.
-# Configura los secretos en: Settings → Secrets and variables → Actions
-# (los mismos nombres que en .env) y la variable FACTORY_NICHE en la pestaña "Variables".
+# Configura en Settings → Secrets and variables → Actions:
+#   Secrets:   ANTHROPIC_API_KEY, FACTORY_GITHUB_TOKEN, VERCEL_TOKEN, SUPABASE_ACCESS_TOKEN, STRIPE_SECRET_KEY
+#   Variables: FACTORY_NICHE, FACTORY_GITHUB_OWNER, SUPABASE_ORG_ID (y VERCEL_TEAM_ID si usas equipo)
 name: SaaS Factory
 
 on:
   schedule:
     - cron: "17 13 * * 1"        # lunes 9:17 (hora de Santo Domingo)
-  workflow_dispatch:              # también puedes lanzarla a mano desde la pestaña Actions
+  workflow_dispatch:
     inputs:
+      mode:
+        description: "Qué hacer"
+        type: choice
+        options: [lanzar, solo-revisar-claves]
+        default: lanzar
       niche:
         description: "Nicho (vacío = usa la variable FACTORY_NICHE)"
         required: false
@@ -18,33 +24,50 @@ on:
 concurrency: saas-factory
 
 jobs:
-  build:
+  factory:
     runs-on: ubuntu-latest
     timeout-minutes: 340
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.FACTORY_GITHUB_TOKEN }}
+      GITHUB_OWNER: ${{ vars.FACTORY_GITHUB_OWNER }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_ORG_ID: ${{ vars.SUPABASE_ORG_ID }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      MAX_TOKENS_PER_PROJECT: ${{ vars.MAX_TOKENS_PER_PROJECT || '8000000' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
-      - run: npm ci || npm install
+      - run: npm ci
+
+      - name: Revisar claves
+        run: npm run -s factory -- doctor
+
       - name: Ejecutar la fábrica
+        if: ${{ inputs.mode != 'solo-revisar-claves' }}
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.FACTORY_GITHUB_TOKEN }}
-          GITHUB_OWNER: ${{ vars.FACTORY_GITHUB_OWNER }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_ORG_ID: ${{ vars.SUPABASE_ORG_ID }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          MAX_TOKENS_PER_PROJECT: ${{ vars.MAX_TOKENS_PER_PROJECT || '8000000' }}
+          NICHE: ${{ inputs.niche || vars.FACTORY_NICHE }}
+          COUNT: ${{ inputs.count || '2' }}
         run: |
+          if [ -z "$NICHE" ]; then echo "::error::Define la variable FACTORY_NICHE o escribe un nicho al lanzar."; exit 1; fi
           git config --global user.email "factory@saas.local"
           git config --global user.name "SaaS Factory"
-          npm run factory -- auto "${{ inputs.niche || vars.FACTORY_NICHE }}" -n "${{ inputs.count || '2' }}"
-      - name: Guardar estado y registros
+          npm run -s factory -- auto "$NICHE" -n "$COUNT"
+
+      - name: Informe
+        if: always()
+        run: npm run -s factory -- report >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Guardar estado, registros y kits de lanzamiento
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: factory-state-${{ github.run_id }}
-          path: projects/*/.factory/
+          name: factory-${{ github.run_id }}
+          path: |
+            projects/*/.factory/
+            projects/*/docs/
+          if-no-files-found: ignore
           retention-days: 90

@@ -11,6 +11,7 @@ import { deployAll } from "./deploy.js";
 import { logger, projectDir, saveState } from "./state.js";
 import { smokeTest } from "./smoke.js";
 import { startDashboard } from "./dashboard.js";
+import { doctor } from "./doctor.js";
 
 const program = new Command()
   .name("factory")
@@ -103,6 +104,29 @@ program
     }
     console.table(rows);
   });
+
+program
+  .command("report")
+  .description("Informe en Markdown de todos los SaaS (lo usa GitHub Actions)")
+  .action(async () => {
+    if (!existsSync(config.workspaceDir)) return console.log("Sin proyectos en esta ejecución.");
+    const lines = ["## 🏭 SaaS Factory — informe", "", "| SaaS | Estado | Enlace | Tokens |", "|---|---|---|---|"];
+    let live = 0;
+    for (const d of await readdir(config.workspaceDir)) {
+      const s = await loadState(d);
+      if (!s) continue;
+      if (s.stage === "done") live++;
+      const st = s.error ? `❌ ${s.stage}: ${s.error.slice(0, 80)}` : s.stage === "done" ? "✅ en vivo" : `⏳ ${s.stage}`;
+      lines.push(`| **${s.prd?.name ?? s.slug}**<br>${s.prd?.tagline ?? ""} | ${st} | ${s.deploy.url ?? "—"} | ${(s.tokensUsed / 1e6).toFixed(2)}M |`);
+    }
+    lines.push("", `**${live}** SaaS nuevos en vivo. Los kits de lanzamiento (docs/LAUNCH.md) están en cada repositorio.`);
+    console.log(lines.join("\n"));
+  });
+
+program
+  .command("doctor")
+  .description("Comprueba que todas las claves están bien configuradas")
+  .action(async () => { if (!(await doctor())) process.exit(1); });
 
 program
   .command("dashboard")

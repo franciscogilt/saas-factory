@@ -5,6 +5,7 @@ const CHECKS: { path: string; method?: string; expect: (status: number, body: st
   { path: "/", label: "landing", expect: (s) => s === 200 },
   { path: "/pricing", label: "precios", expect: (s) => s === 200 },
   { path: "/login", label: "login", expect: (s) => s === 200 },
+  { path: "/blog", label: "blog", expect: (s) => s === 200 },
   { path: "/terms", label: "términos", expect: (s) => s === 200 },
   { path: "/privacy", label: "privacidad", expect: (s) => s === 200 },
   { path: "/sitemap.xml", label: "sitemap", expect: (s) => s === 200 },

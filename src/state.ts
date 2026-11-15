@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "./config.js";
 
-export type Stage = "prd" | "plan" | "scaffold" | "build" | "review" | "qa" | "deploy" | "verify" | "done" | "failed";
+export type Stage = "prd" | "plan" | "scaffold" | "build" | "review" | "growth" | "qa" | "deploy" | "verify" | "done" | "failed";
 
 export interface Plan { id: string; name: string; priceUsd: number; features: string[] }
 export interface PRD {

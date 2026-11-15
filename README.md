@@ -3,13 +3,13 @@
 Una fábrica de software autónoma: le das un nicho o una idea y un equipo de agentes de IA (Claude) diseña, programa, prueba y **despliega** un SaaS completo con login, base de datos y cobros por suscripción.
 
 ```
- nicho ─► 💡 Ideador ─► 📋 PM ─► 🏗️ Arquitecto ─► 👩‍💻 Ingeniero ─► 🔍 Revisor ─► 🧪 QA ─► 🚀 DevOps ─► ✅ Verificación
+ nicho ─► 💡 Ideador ─► 📋 PM ─► 🏗️ Arquitecto ─► 👩‍💻 Ingeniero ─► 🔍 Revisor ─► 📈 Crecimiento ─► 🧪 QA ─► 🚀 DevOps ─► ✅ Verificación
           ideas       PRD +     tareas         código         seguridad    build     GitHub ·     pruebas sobre
           puntuadas   precios                                 RLS, huecos  verde     Supabase ·   el sitio en vivo
                                                                                      Stripe · Vercel
 ```
 
-Cada SaaS sale con: landing, precios, términos, privacidad, SEO (sitemap, robots, imagen para redes), login por enlace mágico, dashboard privado, facturación (Stripe Checkout + portal + webhook), base de datos Postgres con RLS y la funcionalidad principal que definió el PRD.
+Cada SaaS sale con: landing, blog con 3 artículos SEO, kit de lanzamiento (Product Hunt, X, LinkedIn, Reddit, email) en `docs/LAUNCH.md`, precios, términos, privacidad, SEO (sitemap, robots, imagen para redes), login por enlace mágico, dashboard privado, facturación (Stripe Checkout + portal + webhook), base de datos Postgres con RLS y la funcionalidad principal que definió el PRD.
 
 ## 1. Instalación (una sola vez)
 
@@ -47,6 +47,7 @@ npm run factory -- build "..." --no-deploy
 npm run factory -- deploy <slug>                           # publicarlo después
 
 # Operación
+npm run factory -- doctor            # comprueba que todas las claves funcionan
 npm run factory -- status            # tabla con etapa, tareas, tokens y URL de cada SaaS
 npm run factory -- resume <slug>     # retoma donde se quedó si algo falló
 npm run factory -- dashboard         # panel web en http://localhost:4000 con progreso y registros en vivo
@@ -59,7 +60,7 @@ Sube la fábrica a un repositorio de GitHub y el workflow `.github/workflows/fac
 - **Secrets:** `ANTHROPIC_API_KEY`, `FACTORY_GITHUB_TOKEN`, `VERCEL_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `STRIPE_SECRET_KEY`
 - **Variables:** `FACTORY_NICHE`, `FACTORY_GITHUB_OWNER`, `SUPABASE_ORG_ID` (y `VERCEL_TEAM_ID` si usas equipo)
 
-También puedes lanzarlo a mano desde la pestaña *Actions → SaaS Factory → Run workflow*. El estado y los registros de cada ejecución quedan guardados 90 días como artefacto.
+También puedes lanzarlo a mano desde la pestaña *Actions → SaaS Factory → Run workflow*. Elige **solo-revisar-claves** la primera vez para comprobar la configuración sin gastar nada. Al terminar, cada ejecución muestra un informe con los SaaS lanzados y sus enlaces. El estado y los registros de cada ejecución quedan guardados 90 días como artefacto.
 
 Cada proyecto vive en `projects/<slug>/` con su estado en `.factory/state.json` y el registro completo en `.factory/log.txt`. Si se corta la luz o falla una API, `resume` continúa desde la última etapa guardada, sin repetir trabajo ni gastar tokens de más.
 
@@ -67,10 +68,11 @@ Cada proyecto vive en `projects/<slug>/` con su estado en `.factory/state.json` 
 
 | Archivo | Rol |
 |---|---|
-| `src/agents.ts` | Los 6 agentes: ideador, PM, arquitecto, ingeniero, revisor y QA |
+| `src/agents.ts` | Los 7 agentes: ideador, PM, arquitecto, ingeniero, revisor, crecimiento y QA |
 | `src/llm.ts` | Bucle agéntico con herramientas + salida JSON estructurada + control de presupuesto |
 | `src/tools.ts` | Herramientas del ingeniero (leer/escribir/editar archivos, ejecutar npm/tsc), encerradas en la carpeta del proyecto |
 | `src/pipeline.ts` | Línea de montaje con etapas reanudables |
+| `src/doctor.ts` | Verifica claves, permisos y límites de cada servicio |
 | `src/smoke.ts` | Pruebas sobre el sitio publicado: páginas responden, dashboard protegido, webhook rechaza firmas falsas |
 | `src/dashboard.ts` | Panel web local de la fábrica |
 | `src/deploy.ts` | Crea repo, proyecto Supabase + migraciones, productos/precios/webhook de Stripe y despliegue en Vercel |

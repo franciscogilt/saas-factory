@@ -24,6 +24,7 @@ export function Footer() {
         <span>© {new Date().getFullYear()} {product.name}</span>
         <nav className="flex gap-5">
           <Link href="/pricing" className="hover:text-zinc-900">Precios</Link>
+          <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
           <Link href="/terms" className="hover:text-zinc-900">Términos</Link>
           <Link href="/privacy" className="hover:text-zinc-900">Privacidad</Link>
         </nav>

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { config } from "./config.js";
 import { loadState, projectDir } from "./state.js";
 
-const STAGES = ["scaffold", "plan", "build", "review", "qa", "deploy", "verify", "done"];
+const STAGES = ["scaffold", "plan", "build", "review", "growth", "qa", "deploy", "verify", "done"];
 
 async function allProjects() {
   if (!existsSync(config.workspaceDir)) return [];

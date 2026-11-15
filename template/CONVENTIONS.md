@@ -11,7 +11,8 @@
 - `lib/subscription.ts` → `getSubscription(userId)` y `getUserPlan()` para limitar funciones por plan.
 - `components/ui.tsx` — `Button`, `LinkButton`, `Card`, `Input`, `Navbar`.
 - `components/legal.tsx` — `Footer` (enlaces a precios/términos/privacidad) y `LegalPage`. Toda página pública debe terminar con `<Footer />`.
-- Ya existen y no hay que recrearlas: `/terms`, `/privacy`, `/sitemap.xml`, `/robots.txt`, imagen OpenGraph y página 404. Si añades páginas públicas, agrégalas a `app/sitemap.ts`.
+- Blog: `/blog` y `/blog/[slug]` leen `lib/posts.ts` (lo escribe el agente de crecimiento). No lo edites a mano.
+- Ya existen y no hay que recrearlas: `/blog`, `/terms`, `/privacy`, `/sitemap.xml`, `/robots.txt`, imagen OpenGraph y página 404. Si añades páginas públicas, agrégalas a `app/sitemap.ts`.
 - Las pruebas post-despliegue exigen que `/`, `/pricing`, `/login`, `/terms`, `/privacy` respondan 200 y que `/dashboard` redirija sin sesión.
 - `supabase/migrations/NNNN_nombre.sql` — numeradas, se aplican en orden. NUNCA edites una existente; crea una nueva.
 

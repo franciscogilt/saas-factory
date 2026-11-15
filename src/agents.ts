@@ -176,6 +176,73 @@ export async function reviewCode(prd: PRD, root: string, budget: Budget, log: (m
   });
 }
 
+// ─────────────────────────── 4c. CRECIMIENTO ───────────────────────────
+export interface Post { slug: string; title: string; description: string; content: string }
+export interface Launch { productHunt: string; twitterThread: string[]; linkedin: string; reddit: { subreddit: string; title: string; body: string }[]; coldEmail: string; keywords: string[] }
+
+export async function writeGrowth(prd: PRD, budget: Budget): Promise<{ posts: Post[]; launch: Launch }> {
+  const system =
+    "Eres un growth marketer experto en SEO y lanzamientos de micro-SaaS sin presupuesto. Escribes en el idioma del cliente objetivo, " +
+    "con tono humano y útil, sin exageraciones ni promesas falsas, sin inventar estadísticas, testimonios ni clientes. " +
+    "El contenido debe aportar valor por sí mismo y mencionar el producto solo donde encaja de forma natural.";
+  const ctx = `Producto: ${prd.name} — ${prd.tagline}\nCliente: ${prd.targetCustomer}\nProblema: ${prd.problem}\nPropuesta: ${prd.valueProposition}\n` +
+    `Funciones: ${prd.coreFeatures.map((f) => f.title).join(", ")}\nPrecios: ${prd.plans.map((p) => `${p.name} $${p.priceUsd}`).join(", ")}`;
+
+  const { posts } = await askJSON<{ posts: Post[] }>({
+    model: config.models.strategy,
+    budget,
+    system,
+    prompt: `${ctx}\n\nEscribe 3 artículos de blog SEO (900-1300 palabras cada uno) que respondan búsquedas reales de este cliente con intención de compra ` +
+      `(guías "cómo…", comparativas, plantillas, errores comunes). Formato del contenido: párrafos separados por línea en blanco, "## " para subtítulos, "- " para listas, **negritas**. Sin el título dentro del contenido.`,
+    schema: {
+      type: "object",
+      properties: {
+        posts: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              slug: { type: "string", description: "kebab-case con la palabra clave" },
+              title: { type: "string", description: "≤ 65 caracteres, con la palabra clave" },
+              description: { type: "string", description: "meta descripción ≤ 155 caracteres" },
+              content: { type: "string" },
+            },
+            required: ["slug", "title", "description", "content"],
+          },
+        },
+      },
+      required: ["posts"],
+    },
+  });
+
+  const launch = await askJSON<Launch>({
+    model: config.models.strategy,
+    budget,
+    system,
+    prompt: `${ctx}\n\nPrepara el kit de lanzamiento. Usa {{URL}} donde vaya el enlace.`,
+    schema: {
+      type: "object",
+      properties: {
+        productHunt: { type: "string", description: "Tagline (≤60 car.) + descripción + primer comentario del maker" },
+        twitterThread: { type: "array", items: { type: "string" }, description: "Hilo de 5-7 tweets ≤ 280 car." },
+        linkedin: { type: "string" },
+        reddit: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { subreddit: { type: "string" }, title: { type: "string" }, body: { type: "string", description: "Aporta valor primero; respeta las reglas anti-spam" } },
+            required: ["subreddit", "title", "body"],
+          },
+        },
+        coldEmail: { type: "string", description: "Email corto y personalizable para contactar a 1 cliente potencial" },
+        keywords: { type: "array", items: { type: "string" }, description: "10 palabras clave long-tail para siguientes artículos" },
+      },
+      required: ["productHunt", "twitterThread", "linkedin", "reddit", "coldEmail", "keywords"],
+    },
+  });
+  return { posts, launch };
+}
+
 // ─────────────────────────── 5. QA ───────────────────────────
 export async function qaLoop(prd: PRD, root: string, budget: Budget, log: (m: string) => void, startRound = 0, onRound?: (r: number) => Promise<void>) {
   log("QA: instalando dependencias…");
