@@ -4,6 +4,7 @@
 // Requiere: npm i -D @electric-sql/pglite
 import { PGlite } from "@electric-sql/pglite";
 import { createServer } from "node:http";
+import crypto from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 
 const MIG = process.argv[2];
@@ -29,11 +30,13 @@ function subFromAuth(h) {
   const tok = (h.authorization ?? "").replace(/^Bearer /, "");
   try {
     const p = JSON.parse(Buffer.from(tok.split(".")[1], "base64url").toString());
+    if (p.role === "service_role") return "service_role";
     return p.role === "authenticated" ? p.sub : null;
   } catch { return null; }
 }
 
 async function asRole(sub, fn) {
+  if (sub === "service_role") return db.transaction((tx) => fn(tx)); // service_role ignora RLS
   return db.transaction(async (tx) => {
     await tx.exec(`set local role ${sub ? "authenticated" : "anon"}`);
     await tx.query(`select set_config('request.jwt.claim.sub', $1, true)`, [sub ?? ""]);
@@ -56,7 +59,13 @@ function where(params, args) {
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
+  // Como PostgREST: con Accept vnd.pgrst.object (.single()/.maybeSingle()) devuelve un objeto, no una lista.
+  const wantsObject = (req.headers.accept ?? "").includes("vnd.pgrst.object");
   const send = (status, body, headers = {}) => {
+    if (wantsObject && Array.isArray(body) && status < 300) {
+      if (body.length !== 1) { status = 406; body = { code: "PGRST116", message: `Se esperaba 1 fila y hay ${body.length}` }; }
+      else body = body[0];
+    }
     res.writeHead(status, { "Content-Type": "application/json", ...headers });
     res.end(body === undefined ? "" : JSON.stringify(body));
   };
@@ -68,6 +77,12 @@ const server = createServer(async (req, res) => {
     if (url.pathname === "/auth/v1/user") {
       if (!sub) return send(401, { code: 401, error_code: "bad_jwt", msg: "invalid JWT" });
       return send(200, { id: sub, aud: "authenticated", role: "authenticated", email: "dueno@barberia.com", app_metadata: {}, user_metadata: {}, created_at: new Date().toISOString() });
+    }
+    if (url.pathname === "/auth/v1/admin/users" && req.method === "POST") {
+      if (sub !== "service_role") return send(403, { msg: "service_role requerido" });
+      const id = crypto.randomUUID();
+      await db.query("insert into auth.users (id, email) values ($1, $2)", [id, json.email]);
+      return send(200, { id, email: json.email, aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: {}, created_at: new Date().toISOString() });
     }
     if (url.pathname.startsWith("/auth/v1/")) return send(200, {});
 

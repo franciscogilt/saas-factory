@@ -7,6 +7,16 @@ Cada negocio obtiene un menú online (`/m/su-nombre`) y un cartel con código QR
 - **Plan Gratis:** hasta 25 productos · **Pro:** US$9/mes, ilimitado y sin marca MenúFácil
 - PRD completo: [docs/PRD.md](docs/PRD.md) · Kit de lanzamiento: [docs/LAUNCH.md](docs/LAUNCH.md)
 
+## Menú de demostración (para vender)
+
+Después de publicar, crea el negocio de ejemplo que se enseña en las visitas (`/m/demo-pica-pollo`, 13 productos en 3 categorías):
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… DEMO_WHATSAPP="809 …" npm run seed:demo
+```
+
+Con `DEMO_WHATSAPP` = tu número, los pedidos de prueba de la demo te llegan a ti. Puedes ejecutarlo de nuevo cuando quieras: rehace el menú sin duplicarlo.
+
 ## Funciones
 
 - Categorías y productos con precio, descripción, orden y "agotado" en tiempo real

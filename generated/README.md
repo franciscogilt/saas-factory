@@ -16,6 +16,8 @@ cp -r generated/citafacil projects/      # o menufacil
 npm run factory -- deploy citafacil
 ```
 
+Para MenúFácil, después crea el menú de demostración con `npm run seed:demo` (ver [su README](menufacil/README.md)).
+
 La fábrica crea el repositorio, el proyecto de Supabase (con las migraciones), el producto y el precio en Stripe y el sitio en Vercel. Después ejecuta las pruebas sobre el sitio publicado.
 
 ## Probarlo en tu computadora sin cuentas

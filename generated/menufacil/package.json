@@ -10,7 +10,8 @@
     "test:sql": "node tests/sql.test.mjs",
     "mock:supabase": "node ../../tools/supabase-mock.mjs supabase/migrations 54321",
     "test:e2e": "node tests/e2e.test.mjs",
-    "test:order": "npx tsx tests/order.test.mts"
+    "test:order": "npx tsx tests/order.test.mts",
+    "seed:demo": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -19,7 +19,7 @@ const authCookie = [{ name: "sb-localhost-auth-token", value: "base64-" + b64(se
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "/usr/bin/google-chrome", args: ["--no-sandbox"] });
 const mobile = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: "es-DO", timezoneId: "America/Santo_Domingo" };
 const errors = [];
-const track = (p) => p.on("pageerror", (e) => errors.push(e.message));
+const track = (p) => p.on("pageerror", (e) => errors.push(`[${p.url().replace(BASE, "")}] ${e.message.slice(0, 60)}`));
 
 // ── Landing
 let p = await (await browser.newContext(mobile)).newPage(); track(p);
