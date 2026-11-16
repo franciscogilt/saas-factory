@@ -1,0 +1,20 @@
+{
+  "name": "React (Vite + TypeScript)",
+  "kind": "frontend",
+  "aliases": [
+    "reactjs",
+    "react js",
+    "vite",
+    "vite react"
+  ],
+  "description": "SPA con React, Vite y TypeScript.",
+  "scaffold": "Crea el proyecto con `npm create vite@latest . -- --template react-ts` (en una carpeta vacía). Añade Vitest + Testing Library + jsdom y el script `test` = `vitest run`.",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run build && npm test",
+  "dev": "npm run dev",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *"
+  ]
+}

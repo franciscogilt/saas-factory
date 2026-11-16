@@ -13,8 +13,39 @@ export const PLACEHOLDER_ENV = {
   NEXT_PUBLIC_APP_URL: "http://localhost:3000",
 };
 
-const ALLOWED = /^(npm|npx|node|git (status|diff|log)|ls|cat|grep|find|tsc)\b/;
-const IGNORE = new Set(["node_modules", ".next", ".git", ".factory"]);
+/** Comandos que el agente puede ejecutar siempre (lectura y estado de git). */
+export const BASE_COMMANDS = ["ls *", "cat *", "grep *", "find *", "git status*", "git diff*", "git log*"];
+/** Comandos del stack Node, el que usa la plantilla SaaS. */
+export const NODE_COMMANDS = ["npm *", "npx *", "node *", "tsc *"];
+/** Nunca permitidos, declare lo que declare un stack. */
+export const FORBIDDEN_COMMANDS = [
+  "sudo *", "su *", "git push*", "git reset --hard*", "git clean*", "git checkout main*", "git checkout master*",
+  "rm -rf /*", "rm -rf ~*", "curl *", "wget *", "ssh *", "scp *", "bash *", "sh *", "zsh *", "eval *",
+  "cdk deploy*", "npx cdk deploy*", "aws *", "terraform apply*", "docker push*",
+];
+
+// Carpetas pesadas o generadas que no se listan ni se envían al modelo, en cualquier stack.
+export const IGNORE = new Set([
+  "node_modules", ".next", ".git", ".factory", "dist", "build", "out", "coverage",
+  ".venv", "venv", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+  "vendor", "target", ".gradle", ".dart_tool", "Pods", ".idea", ".vscode",
+]);
+
+/** "pip *" → "pip"; "git status*" → "git status". */
+const prefixOf = (pattern: string) => pattern.replace(/\s*\*$/, "").trim();
+const matches = (cmd: string, pattern: string) => {
+  const p = prefixOf(pattern);
+  return cmd === p || cmd.startsWith(p + " ") || (pattern.endsWith("*") && !pattern.endsWith(" *") && cmd.startsWith(p));
+};
+
+/** Un comando del agente: uno solo, sin encadenar ni redirigir, y dentro de lo permitido. */
+export function checkCommand(command: string, allowed: string[]) {
+  const cmd = command.trim();
+  if (/[;&|`<>]|\$\(/.test(cmd)) throw new Error("Ejecuta un solo comando, sin ; && | ` $() ni redirecciones.");
+  if (FORBIDDEN_COMMANDS.some((p) => matches(cmd, p))) throw new Error("Comando prohibido por seguridad.");
+  if (![...BASE_COMMANDS, ...allowed].some((p) => matches(cmd, p)))
+    throw new Error(`Comando no permitido. Permitidos: ${[...BASE_COMMANDS, ...allowed].map(prefixOf).join(", ")}.`);
+}
 
 export function sh(cmd: string, cwd: string, timeoutMs = 15 * 60_000): Promise<{ code: number; out: string }> {
   return new Promise((res) => {
@@ -38,7 +69,7 @@ export async function listTree(root: string, dir = root, acc: string[] = []): Pr
 }
 
 /** Herramientas del programador, encerradas en la carpeta del proyecto. */
-export function projectTools(root: string): Tool[] {
+export function projectTools(root: string, allowed: string[] = NODE_COMMANDS): Tool[] {
   const safe = (p: string) => {
     const full = resolve(root, p);
     if (!full.startsWith(resolve(root))) throw new Error("Ruta fuera del proyecto");
@@ -97,10 +128,10 @@ export function projectTools(root: string): Tool[] {
     },
     {
       name: "run_command",
-      description: "Ejecuta un comando en el proyecto. Permitidos: npm, npx, node, tsc, ls, cat, grep, find, git status/diff/log.",
+      description: `Ejecuta UN comando en el proyecto (sin encadenar). Permitidos: ${[...BASE_COMMANDS, ...allowed].map(prefixOf).join(", ")}.`,
       input_schema: { type: "object", properties: { command: { type: "string" } }, required: ["command"] },
       run: async ({ command }) => {
-        if (!ALLOWED.test(command.trim())) throw new Error("Comando no permitido.");
+        checkCommand(command, allowed);
         const r = await sh(command, root);
         return `exit ${r.code}\n${r.out}`;
       },

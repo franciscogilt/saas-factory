@@ -13,6 +13,40 @@ Una fábrica de software autónoma: le das un nicho o una idea y un equipo de ag
 
 Cada SaaS sale con: landing, blog con 3 artículos SEO, kit de lanzamiento (Product Hunt, X, LinkedIn, Reddit, email) en `docs/LAUNCH.md`, precios, términos, privacidad, SEO (sitemap, robots, imagen para redes), login por enlace mágico, dashboard privado, facturación (Stripe Checkout + portal + webhook), base de datos Postgres con RLS y la funcionalidad principal que definió el PRD.
 
+## 0. Desarrollar con cualquier stack en tu máquina
+
+La fábrica trabaja con cualquier tecnología, en proyectos nuevos o en los que ya tienes. Usa tu sesión de Claude Code (sin clave de API).
+
+```bash
+# Proyecto nuevo: combina tecnologías con +
+npm run factory -- new "Sistema de inventario para ferreterías" --stack "angular + springboot + postgresql + docker-compose"
+npm run factory -- new "API de reservas" --stack "fastapi + postgresql" --dir ~/proyectos/reservas
+npm run factory -- new "Portal de clientes" --stack ".net con c# + react + aws"
+npm run factory -- new "Bot de facturas" --stack "Go con la librería estándar"   # sin paquete: lo resuelve la IA
+
+# Proyecto existente (debe ser un repositorio git sin cambios pendientes)
+npm run factory -- improve ~/proyectos/mi-api "Añade autenticación con JWT y pruebas"
+
+npm run factory -- stacks             # paquetes disponibles y sus comandos
+npm run factory -- resume <carpeta>   # retoma si se detuvo (límite del plan, error…)
+```
+
+**Paquetes incluidos** (`stacks/`): `fastapi`, `django`, `dotnet` (.NET/C#), `springboot`, `express` (Node), `angular`, `react`, `nextjs`, `postgresql`, `docker-compose`, `aws` (infraestructura con CDK) y `nextjs-supabase` (la plantilla SaaS). Se reconocen también por alias: "spring boot", ".net", "c#", "node", "postgres", "docker"…
+
+**Qué hace `new`:** define el alcance → resuelve el stack (paquetes + IA para lo que no tenga paquete) → **te muestra los comandos y te pide confirmación** → crea el proyecto (frontend y backend en `frontend/` y `backend/` si hay ambos) → planifica → programa → revisa (seguridad, pruebas, completitud) → instala y ejecuta la verificación de cada componente hasta que todo pase → primer commit. Deja un `CLAUDE.md` y un `factory.stack.json` para que futuros cambios sepan cómo trabajar.
+
+**Qué hace `improve`:** lee `factory.stack.json` o detecta el stack y sus pruebas → crea la rama `factory/<tarea>` (tu rama principal no se toca) → comprueba si las pruebas ya fallaban antes → planifica, programa, revisa y verifica hasta verde → commit en la rama. Al final te dice cómo revisar (`git diff`), aceptar (`git merge`) o descartar el cambio.
+
+**Seguridad en tu máquina:**
+- El agente solo ejecuta los comandos del stack (p. ej. `mvn`, `dotnet`, `npm`, `.venv/bin/python`), de uno en uno, sin encadenar ni redirigir.
+- Siempre prohibidos: `sudo`, `curl`/`wget`, `bash`/`sh`, `git push`, `git reset --hard`, y desplegar en la nube (`cdk deploy`, `aws`, `terraform apply`, `docker push`). La infraestructura de AWS se prepara, pero el despliegue (y su coste) lo decides tú.
+- Si la IA propone un stack con comandos prohibidos, se rechaza antes de ejecutar nada.
+- Lo generado (`node_modules`, `.venv`, `bin/obj`, `target`, `dist`, `.env`…) nunca se versiona: en proyectos nuevos va al `.gitignore`; en los tuyos, a `.git/info/exclude` para no tocar tus archivos.
+
+**Añadir tu propio stack:** crea `stacks/<id>/stack.json` (nombre, tipo, comandos de instalar/verificar/arrancar, comandos permitidos, cómo crearlo) y `stacks/<id>/CONVENTIONS.md` con tus reglas. Copia uno existente como base. También puedes tenerlos fuera del repositorio con `FACTORY_STACKS_DIR`.
+
+**En Windows:** usa WSL (los comandos de Python usan `.venv/bin/…`).
+
 ## 1. Instalación (una sola vez)
 
 Requisitos: Node 20+ y git.
@@ -75,6 +109,8 @@ Cada proyecto vive en `projects/<slug>/` con su estado en `.factory/state.json` 
 | `src/llm.ts` | Bucle agéntico con herramientas + salida JSON estructurada + control de presupuesto |
 | `src/tools.ts` | Herramientas del ingeniero (leer/escribir/editar archivos, ejecutar npm/tsc), encerradas en la carpeta del proyecto |
 | `src/pipeline.ts` | Línea de montaje con etapas reanudables |
+| `src/generic.ts` | `new` e `improve`: línea de montaje para cualquier stack |
+| `src/stacks.ts` + `stacks/` | Paquetes de stack combinables y validación de seguridad |
 | `src/doctor.ts` | Verifica claves, permisos y límites de cada servicio |
 | `src/smoke.ts` | Pruebas sobre el sitio publicado: páginas responden, dashboard protegido, webhook rechaza firmas falsas |
 | `src/dashboard.ts` | Panel web local de la fábrica |

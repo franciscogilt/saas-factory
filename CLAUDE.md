@@ -3,6 +3,7 @@
 Este repositorio es la fábrica de SaaS de Francisco. Contiene:
 
 - `src/` — la fábrica autónoma (CLI `npm run factory -- …`): agentes ideador, PM, arquitecto, ingeniero, revisor, crecimiento y QA, más el despliegue a GitHub, Supabase, Stripe y Vercel. Para la IA usa la sesión de Claude Code del usuario (`ENGINE=claude-code`, por defecto; `src/claude-code.ts`): **nunca le pidas una clave de API de Anthropic**. Para publicar necesita claves de GitHub, Vercel, Supabase y Stripe en `.env` (ver `.env.example`).
+- `src/generic.ts`, `src/stacks.ts`, `stacks/` — modo **cualquier stack**: `factory new "idea" --stack "angular + springboot + postgresql"` y `factory improve <carpeta> "tarea"` (rama aparte). Paquetes: fastapi, django, dotnet, springboot, express, angular, react, nextjs, postgresql, docker-compose, aws, nextjs-supabase. El usuario trabaja con todos ellos.
 - `template/` — plantilla base de cada SaaS: Next.js 15 + Supabase + Stripe + Tailwind v4. Lee `template/CONVENTIONS.md` antes de tocarla.
 - `generated/<slug>/` — SaaS ya construidos y probados, listos para `factory deploy`. Ver `generated/README.md`.
 - `tools/supabase-mock.mjs` — Supabase simulado (Auth + PostgREST) sobre Postgres embebido con RLS real, para probar sin cuenta.
@@ -29,6 +30,10 @@ Cuando el usuario pida un SaaS nuevo en el chat, sigue el mismo proceso que la f
 8. **Entrega**: `generated/<slug>/README.md`, `.factory/state.json` con `stage: "deploy"` (añádelo con `git add -f`), fila nueva en `generated/README.md`, commit y push. Envía al usuario un collage de capturas del móvil.
 
 Si un error de prueba viene de la prueba y no de la app, dilo así; no "arregles" la app para pasar una prueba mal escrita.
+
+## Usar la fábrica para cualquier stack desde el chat
+
+Si el usuario pide un proyecto o un cambio con otro stack, sigue el mismo método que `src/generic.ts`: alcance → stack (usa las convenciones de `stacks/<id>/CONVENTIONS.md`) → plan → código → revisión de seguridad → verificación real de cada componente hasta verde → commit. En proyectos existentes, trabaja en una rama `factory/<tarea>` y nunca en la principal. Nunca despliegues en la nube.
 
 ## Mejorar la fábrica
 

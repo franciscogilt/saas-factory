@@ -40,11 +40,13 @@ export async function runAgent(opts: {
   budget: Budget;
   /** Carpeta del proyecto (obligatoria con el motor claude-code, que usa sus propias herramientas). */
   cwd: string;
+  /** Comandos del stack que el agente puede ejecutar (por defecto, los de Node). */
+  allowedCommands?: string[];
   maxTurns?: number;
   log?: (msg: string) => void;
 }): Promise<string> {
   if (config.engine === "claude-code")
-    return ccAgent({ model: opts.model, system: opts.system, prompt: opts.prompt, cwd: opts.cwd, budget: opts.budget, log: opts.log });
+    return ccAgent({ model: opts.model, system: opts.system, prompt: opts.prompt, cwd: opts.cwd, budget: opts.budget, log: opts.log, allowedCommands: opts.allowedCommands });
   const { model, system, tools, budget, maxTurns = 80, log = () => {} } = opts;
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: opts.prompt }];
   const byName = new Map(tools.map((t) => [t.name, t]));

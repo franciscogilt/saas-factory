@@ -1,0 +1,21 @@
+{
+  "name": "Angular",
+  "kind": "frontend",
+  "aliases": [
+    "angular js",
+    "angular 17",
+    "angular 18",
+    "angular 19",
+    "angular 20"
+  ],
+  "description": "Angular con componentes standalone y TypeScript estricto.",
+  "scaffold": "Crea el proyecto con `npx -y @angular/cli@latest new web --directory . --defaults --skip-git --ssr=false` (en una carpeta vacía).",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run build",
+  "dev": "npm start",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Next.js",
+  "kind": "fullstack",
+  "aliases": [
+    "next",
+    "next.js",
+    "next js"
+  ],
+  "description": "Next.js (App Router) con TypeScript y Tailwind.",
+  "scaffold": "Crea el proyecto con `npx -y create-next-app@latest . --ts --eslint --tailwind --app --use-npm --yes` (en una carpeta vacía). Añade Vitest + Testing Library y el script `test` = `vitest run`.",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run build && npm test",
+  "dev": "npm run dev",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *"
+  ]
+}

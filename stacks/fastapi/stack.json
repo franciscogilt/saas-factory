@@ -1,0 +1,20 @@
+{
+  "name": "Python + FastAPI",
+  "kind": "backend",
+  "aliases": [
+    "fast api",
+    "python fastapi",
+    "python"
+  ],
+  "description": "API con FastAPI, SQLAlchemy 2 y pytest.",
+  "scaffold": "Crea `requirements.txt` (fastapi, uvicorn[standard], sqlalchemy>=2, pydantic-settings, pytest, httpx; con PostgreSQL añade psycopg[binary] y alembic), luego `app/main.py`, `app/api/`, `app/models/`, `app/db.py`, `app/settings.py` y `tests/`. Ejecuta el comando de instalación antes de probar.",
+  "install": "python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt",
+  "check": ".venv/bin/python -m pytest -q",
+  "dev": ".venv/bin/python -m uvicorn app.main:app --reload --port 8000",
+  "allowedCommands": [
+    "python3 *",
+    "python *",
+    ".venv/bin/python *",
+    ".venv/bin/pip *"
+  ]
+}

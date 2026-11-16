@@ -12,10 +12,46 @@ import { logger, projectDir, saveState } from "./state.js";
 import { smokeTest } from "./smoke.js";
 import { startDashboard } from "./dashboard.js";
 import { doctor } from "./doctor.js";
+import { improveProject, loadGState, newProject, resumeGeneric } from "./generic.js";
+import { describeStack, composeStack, listPacks } from "./stacks.js";
+import { resolve } from "node:path";
 
 const program = new Command()
   .name("factory")
   .description("🏭 Fábrica de software autónoma: de idea a SaaS desplegado.");
+
+// ─────────────── Cualquier stack ───────────────
+program
+  .command("new")
+  .description("Crea un proyecto nuevo con cualquier stack (ej.: --stack \"angular + springboot + postgresql\")")
+  .argument("<idea>", "qué quieres construir")
+  .option("-s, --stack <stack>", "tecnologías separadas por + o comas; sin esto, la fábrica elige")
+  .option("-d, --dir <carpeta>", "dónde crearlo (vacía); por defecto projects/<nombre>")
+  .option("-y, --yes", "no pedir confirmación del stack")
+  .action(async (idea, o) => { await newProject(idea, { stack: o.stack, dir: o.dir, yes: o.yes }); });
+
+program
+  .command("improve")
+  .description("Hace una tarea en un proyecto existente (cualquier stack), en una rama aparte")
+  .argument("<carpeta>", "carpeta del proyecto (repositorio git)")
+  .argument("<tarea>", "qué quieres cambiar o añadir")
+  .option("-s, --stack <stack>", "pista del stack, si la detección necesita ayuda")
+  .option("-b, --branch <rama>", "nombre de la rama (por defecto factory/<tarea>)")
+  .option("-y, --yes", "no pedir confirmación del stack")
+  .action(async (dir, task, o) => { await improveProject(dir, task, { stack: o.stack, branch: o.branch, yes: o.yes }); });
+
+program
+  .command("stacks")
+  .description("Lista los paquetes de stack disponibles")
+  .action(async () => {
+    for (const p of await listPacks()) {
+      console.log(`\n${p.id}  —  ${p.name} [${p.kind}]${p.aliases?.length ? `  (también: ${p.aliases.join(", ")})` : ""}`);
+      if (p.description) console.log(`  ${p.description}`);
+      console.log(describeStack(composeStack([{ ...p, folder: "." }])).split("\n").slice(1, -1).join("\n"));
+    }
+    console.log("\nCombínalos con + : factory new \"…\" --stack \"react + fastapi + postgresql + docker-compose\"");
+    console.log("Lo que no tenga paquete (p. ej. Laravel, Go) lo resuelve la IA y te lo muestra antes de ejecutar nada.");
+  });
 
 program
   .command("ideate")
@@ -68,10 +104,15 @@ program
 
 program
   .command("resume")
-  .description("Retoma un SaaS desde la etapa donde se detuvo")
+  .description("Retoma un SaaS o un proyecto (nombre o carpeta) desde la etapa donde se detuvo")
   .argument("<slug>")
   .option("--no-deploy")
-  .action(async (slug, o) => { await resume(slug, { deploy: o.deploy }); });
+  .action(async (slug, o) => {
+    // Un proyecto de `new`/`improve` se retoma por su carpeta
+    for (const dir of [slug, resolve(config.workspaceDir, slug)])
+      if (await loadGState(resolve(dir))) return void (await resumeGeneric(dir, {}));
+    await resume(slug, { deploy: o.deploy });
+  });
 
 program
   .command("deploy")
@@ -99,7 +140,7 @@ program
         etapa: s.error ? `❌ ${s.stage}` : s.stage,
         tareas: `${s.doneTasks.length}/${s.tasks?.length ?? "?"}`,
         tokens: `${(s.tokensUsed / 1e6).toFixed(2)}M`,
-        url: s.deploy.url ?? "",
+        url: s.deploy?.url ?? "",
       });
     }
     console.table(rows);
@@ -117,7 +158,7 @@ program
       if (!s) continue;
       if (s.stage === "done") live++;
       const st = s.error ? `❌ ${s.stage}: ${s.error.slice(0, 80)}` : s.stage === "done" ? "✅ en vivo" : `⏳ ${s.stage}`;
-      lines.push(`| **${s.prd?.name ?? s.slug}**<br>${s.prd?.tagline ?? ""} | ${st} | ${s.deploy.url ?? "—"} | ${(s.tokensUsed / 1e6).toFixed(2)}M |`);
+      lines.push(`| **${s.prd?.name ?? (s as any).brief?.name ?? s.slug}**<br>${s.prd?.tagline ?? ""} | ${st} | ${s.deploy?.url ?? "—"} | ${(s.tokensUsed / 1e6).toFixed(2)}M |`);
     }
     lines.push("", `**${live}** SaaS nuevos en vivo. Los kits de lanzamiento (docs/LAUNCH.md) están en cada repositorio.`);
     console.log(lines.join("\n"));
@@ -143,7 +184,7 @@ async function runPool(ideas: string[], deploy: boolean) {
       const idea = ideas[i++];
       try {
         const s = await buildSaaS(idea, { deploy });
-        results.push({ idea, ok: true, info: s.deploy.url ?? join(config.workspaceDir, s.slug) });
+        results.push({ idea, ok: true, info: s.deploy?.url ?? join(config.workspaceDir, s.slug) });
       } catch (e: any) {
         results.push({ idea, ok: false, info: e.message }); // un fallo no detiene la fábrica
       }

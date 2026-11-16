@@ -1,0 +1,21 @@
+{
+  "name": "Java + Spring Boot",
+  "kind": "backend",
+  "aliases": [
+    "spring",
+    "spring boot",
+    "java spring",
+    "java"
+  ],
+  "description": "API con Spring Boot, Spring Data JPA y Maven.",
+  "scaffold": "Crea un `pom.xml` con `spring-boot-starter-parent` (versión estable actual), Java 21, y los starters web, validation, data-jpa y test; con PostgreSQL añade el driver `org.postgresql:postgresql`, Flyway y H2 para pruebas. Estructura `src/main/java/<paquete>/` y `src/test/java/`.",
+  "check": "mvn -q verify",
+  "dev": "mvn spring-boot:run",
+  "allowedCommands": [
+    "mvn *",
+    "./mvnw *",
+    "gradle *",
+    "./gradlew *",
+    "java *"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Docker Compose",
+  "kind": "infra",
+  "aliases": [
+    "docker",
+    "compose",
+    "docker compose",
+    "contenedores"
+  ],
+  "description": "Dockerfiles por servicio y docker-compose.yml para levantar todo con un comando.",
+  "check": "docker compose config -q",
+  "dev": "docker compose up --build",
+  "allowedCommands": [
+    "docker compose *",
+    "docker build *"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Node.js + Express",
+  "kind": "backend",
+  "aliases": [
+    "node",
+    "nodejs",
+    "node.js",
+    "node js",
+    "express js",
+    "node express"
+  ],
+  "description": "API con Express y TypeScript.",
+  "scaffold": "Crea `package.json` (type module) con express, zod, cors, dotenv; dev: typescript, tsx, vitest, supertest, @types/express, @types/node. Scripts: `dev` = `tsx watch src/server.ts`, `build` = `tsc`, `start` = `node dist/server.js`, `test` = `vitest run`. Con PostgreSQL usa `pg` y migraciones con node-pg-migrate.",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run build && npm test",
+  "dev": "npm run dev",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *",
+    "tsc *"
+  ]
+}

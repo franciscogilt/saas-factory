@@ -1,0 +1,19 @@
+{
+  "name": "AWS (infraestructura con CDK)",
+  "kind": "deploy",
+  "aliases": [
+    "amazon",
+    "amazon web services",
+    "aws cdk",
+    "cdk"
+  ],
+  "description": "Infraestructura como código para AWS con CDK en TypeScript. La fábrica la prepara; el despliegue lo haces tú.",
+  "scaffold": "En `infra/` crea un proyecto AWS CDK en TypeScript (`package.json` con aws-cdk-lib, constructs, typescript, aws-cdk; `cdk.json`; `bin/` y `lib/`). Sin cuenta ni región fijas en el código.",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run build && npx cdk synth -q",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *"
+  ]
+}

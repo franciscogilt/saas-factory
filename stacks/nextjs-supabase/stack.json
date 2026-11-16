@@ -1,0 +1,21 @@
+{
+  "name": "SaaS Next.js + Supabase + Stripe",
+  "kind": "fullstack",
+  "aliases": [
+    "saas",
+    "next supabase",
+    "nextjs supabase"
+  ],
+  "description": "Plantilla SaaS completa: login, base de datos con RLS, pagos, blog y páginas legales. Para PRD y publicación automática usa `factory build`.",
+  "template": "../../template",
+  "conventionsFile": "../../template/CONVENTIONS.md",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run typecheck && npm run build",
+  "dev": "npm run dev",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *",
+    "tsc *"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "PostgreSQL",
+  "kind": "database",
+  "aliases": [
+    "postgres",
+    "postgre",
+    "postgresql 16",
+    "pg",
+    "psql",
+    "base de datos postgres"
+  ],
+  "description": "Base de datos PostgreSQL.",
+  "allowedCommands": []
+}

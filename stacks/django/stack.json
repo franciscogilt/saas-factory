@@ -1,0 +1,22 @@
+{
+  "name": "Python + Django",
+  "kind": "backend",
+  "aliases": [
+    "python django",
+    "django rest",
+    "drf",
+    "django rest framework"
+  ],
+  "description": "Django con Django REST Framework.",
+  "scaffold": "Crea `requirements.txt` (django, djangorestframework, django-cors-headers, django-environ; con PostgreSQL añade psycopg[binary]), ejecuta el comando de instalación y luego `.venv/bin/django-admin startproject config .`. Crea apps con `.venv/bin/python manage.py startapp <app>`.",
+  "install": "python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt",
+  "check": ".venv/bin/python manage.py check && .venv/bin/python manage.py test",
+  "dev": ".venv/bin/python manage.py runserver 8000",
+  "allowedCommands": [
+    "python3 *",
+    "python *",
+    ".venv/bin/python *",
+    ".venv/bin/pip *",
+    ".venv/bin/django-admin *"
+  ]
+}

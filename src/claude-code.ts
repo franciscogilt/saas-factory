@@ -5,7 +5,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { config } from "./config.js";
-import { PLACEHOLDER_ENV } from "./tools.js";
+import { BASE_COMMANDS, FORBIDDEN_COMMANDS, NODE_COMMANDS, PLACEHOLDER_ENV } from "./tools.js";
 import type { Budget } from "./llm.js";
 
 type CCResult = {
@@ -17,12 +17,12 @@ type CCResult = {
   terminal_reason?: string;
 };
 
-/** Herramientas que el ingeniero puede usar sin pedir permiso: archivos del proyecto y comandos de Node. */
-const ENGINEER_TOOLS = [
-  "Read", "Edit", "Write", "Glob", "Grep",
-  "Bash(npm *)", "Bash(npx *)", "Bash(node *)", "Bash(tsc *)",
-  "Bash(ls *)", "Bash(cat *)", "Bash(grep *)", "Bash(find *)", "Bash(git status*)", "Bash(git diff*)",
-];
+/** Herramientas de archivos + los comandos del stack (los prohibidos se bloquean siempre). */
+function toolArgs(allowedCommands: string[]) {
+  const allow = ["Read", "Edit", "Write", "Glob", "Grep", ...[...BASE_COMMANDS, ...allowedCommands].map((c) => `Bash(${c})`)];
+  const deny = FORBIDDEN_COMMANDS.map((c) => `Bash(${c})`);
+  return ["--allowedTools", allow.join(","), "--disallowedTools", deny.join(",")];
+}
 
 const TIMEOUT_MS = 60 * 60_000;
 
@@ -68,10 +68,10 @@ function check(r: CCResult, budget: Budget) {
 const modelArgs = (m: string) => (m ? ["--model", m] : []);
 
 /** Agente con herramientas trabajando dentro de la carpeta del proyecto. */
-export async function ccAgent(o: { model: string; system: string; prompt: string; cwd: string; budget: Budget; log?: (m: string) => void }) {
+export async function ccAgent(o: { model: string; system: string; prompt: string; cwd: string; budget: Budget; log?: (m: string) => void; allowedCommands?: string[] }) {
   o.log?.("  ↳ Claude Code trabajando en el proyecto…");
   const r = await run(
-    ["--append-system-prompt", o.system, "--permission-mode", "acceptEdits", "--allowedTools", ENGINEER_TOOLS.join(","), ...modelArgs(o.model)],
+    ["--append-system-prompt", o.system, "--permission-mode", "acceptEdits", ...toolArgs(o.allowedCommands ?? NODE_COMMANDS), ...modelArgs(o.model)],
     o.prompt, o.cwd,
   );
   check(r, o.budget);

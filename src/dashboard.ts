@@ -6,6 +6,7 @@ import { config } from "./config.js";
 import { loadState, projectDir } from "./state.js";
 
 const STAGES = ["scaffold", "plan", "build", "review", "growth", "qa", "deploy", "verify", "done"];
+const G_STAGES = ["brief", "stack", "setup", "plan", "build", "review", "qa", "commit", "done"];
 
 async function allProjects() {
   if (!existsSync(config.workspaceDir)) return [];
@@ -15,14 +16,14 @@ async function allProjects() {
     if (!s) continue;
     out.push({
       slug: s.slug,
-      name: s.prd?.name ?? s.slug,
-      tagline: s.prd?.tagline ?? "",
+      name: s.prd?.name ?? (s as any).brief?.name ?? s.slug,
+      tagline: s.prd?.tagline ?? (s as any).brief?.summary ?? "",
       stage: s.stage,
-      progress: Math.round(((STAGES.indexOf(s.stage) + 1) / STAGES.length) * 100),
+      progress: (() => { const list = (s as any).kind === "generic" ? G_STAGES : STAGES; return Math.round(((list.indexOf(s.stage) + 1) / list.length) * 100); })(),
       tasks: `${s.doneTasks.length}/${s.tasks?.length ?? "?"}`,
       tokens: s.tokensUsed,
-      url: s.deploy.url ?? null,
-      repo: s.deploy.repo ?? null,
+      url: s.deploy?.url ?? null,
+      repo: s.deploy?.repo ?? null,
       error: s.error ?? null,
       smoke: s.smoke ?? null,
       updatedAt: s.updatedAt,

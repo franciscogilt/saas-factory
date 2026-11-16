@@ -1,0 +1,22 @@
+{
+  "name": ".NET con C# (ASP.NET Core)",
+  "kind": "backend",
+  "aliases": [
+    ".net",
+    "net",
+    "c#",
+    "csharp",
+    "asp.net",
+    "asp.net core",
+    "dotnet core",
+    ".net core"
+  ],
+  "description": "API con ASP.NET Core, EF Core y xUnit.",
+  "scaffold": "Crea la solución con `dotnet new sln -n App`, `dotnet new webapi -n Api -o src/Api`, `dotnet new xunit -n Api.Tests -o tests/Api.Tests`, `dotnet sln add src/Api tests/Api.Tests` y `dotnet add tests/Api.Tests reference src/Api`. Con PostgreSQL añade Npgsql.EntityFrameworkCore.PostgreSQL.",
+  "install": "dotnet restore",
+  "check": "dotnet build --nologo && dotnet test --nologo",
+  "dev": "dotnet run --project src/Api",
+  "allowedCommands": [
+    "dotnet *"
+  ]
+}
