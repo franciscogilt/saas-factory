@@ -43,18 +43,45 @@ jobs:
       MAX_TOKENS_PER_PROJECT: ${{ vars.MAX_TOKENS_PER_PROJECT || '8000000' }}
     steps:
       - uses: actions/checkout@v4
+
+      # La ejecución programada se pausa (sin fallar ni enviarte correos de error) mientras falte configuración.
+      # Si la lanzas a mano, sigue siempre, para que "Revisar claves" te diga exactamente qué falta.
+      - name: ¿Está configurada?
+        id: cfg
+        env:
+          NICHE: ${{ inputs.niche || vars.FACTORY_NICHE }}
+        run: |
+          missing=""
+          if [ "$ENGINE" = "api" ]; then [ -n "$ANTHROPIC_API_KEY" ] || missing="$missing ANTHROPIC_API_KEY"
+          else [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || missing="$missing CLAUDE_CODE_OAUTH_TOKEN"; fi
+          [ -n "$NICHE" ] || missing="$missing FACTORY_NICHE"
+          for v in GITHUB_TOKEN GITHUB_OWNER VERCEL_TOKEN SUPABASE_ACCESS_TOKEN SUPABASE_ORG_ID STRIPE_SECRET_KEY; do
+            [ -n "${!v}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            { echo "## ⏸️ Piloto automático en pausa"; echo; echo "Falta configurar:$missing"; echo;
+              echo "Añádelo en Settings → Secrets and variables → Actions. Mientras tanto, esta ejecución semanal no hace nada."; } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Piloto automático en pausa: falta$missing"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.ready == 'true'
         with: { node-version: 22, cache: npm }
       - run: npm ci
+        if: steps.cfg.outputs.ready == 'true'
       - name: Instalar Claude Code
-        if: ${{ vars.FACTORY_ENGINE != 'api' }}
+        if: ${{ steps.cfg.outputs.ready == 'true' && vars.FACTORY_ENGINE != 'api' }}
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Revisar claves
+        if: steps.cfg.outputs.ready == 'true'
         run: npm run -s factory -- doctor ${{ inputs.mode == 'probar-sin-publicar' && '--ai-only' || '' }}
 
       - name: Ejecutar la fábrica
-        if: ${{ inputs.mode != 'solo-revisar-claves' }}
+        if: ${{ steps.cfg.outputs.ready == 'true' && inputs.mode != 'solo-revisar-claves' }}
         env:
           NICHE: ${{ inputs.niche || vars.FACTORY_NICHE }}
           COUNT: ${{ inputs.count || '2' }}
@@ -69,11 +96,11 @@ jobs:
           fi
 
       - name: Informe
-        if: always()
+        if: ${{ always() && steps.cfg.outputs.ready == 'true' }}
         run: npm run -s factory -- report >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Guardar estado, registros y kits de lanzamiento
-        if: always()
+        if: ${{ always() && steps.cfg.outputs.ready == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: factory-${{ github.run_id }}
@@ -84,7 +111,7 @@ jobs:
           retention-days: 90
 
       - name: Empaquetar código generado (modo prueba)
-        if: ${{ always() && inputs.mode == 'probar-sin-publicar' }}
+        if: ${{ always() && steps.cfg.outputs.ready == 'true' && inputs.mode == 'probar-sin-publicar' }}
         run: |
           mkdir -p out
           for d in projects/*/; do
@@ -93,7 +120,7 @@ jobs:
           ls out || true
 
       - name: Subir código generado
-        if: ${{ always() && inputs.mode == 'probar-sin-publicar' }}
+        if: ${{ always() && steps.cfg.outputs.ready == 'true' && inputs.mode == 'probar-sin-publicar' }}
         uses: actions/upload-artifact@v4
         with:
           name: saas-generado-${{ github.run_id }}
