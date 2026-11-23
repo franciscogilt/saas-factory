@@ -1,0 +1,1 @@
+{"name":"Conversor","slug":"conversor","summary":"CLI de temperaturas.","features":["C a F"],"acceptance":["go test pasa"]}

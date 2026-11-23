@@ -1,0 +1,1 @@
+{"name":"web","private":true,"type":"module","scripts":{"build":"node build.mjs","test":"node --test","dev":"node build.mjs"}}

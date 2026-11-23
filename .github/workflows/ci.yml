@@ -1,0 +1,122 @@
+# Pruebas automáticas en cada cambio. No necesita claves ni secretos:
+# la IA está simulada (test/fake-claude.mjs) y lo que se compila y prueba es real.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fabrica:
+    name: Fábrica (unitarias + escenarios con Python, Go, Node y Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.22", cache: false }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  springboot:
+    name: Paquete Spring Boot (Java 21 + Maven)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21", cache: maven }
+      - run: npm ci
+      - name: Probar el paquete con Maven real
+        env: { PACKS: springboot }
+        run: node --import tsx --test test/packs.test.ts
+
+  dotnet:
+    name: Paquete .NET ${{ matrix.dotnet }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dotnet: ["8.0.x", "10.0.x"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: "${{ matrix.dotnet }}" }
+      - run: npm ci
+      - name: Crear el proyecto con los comandos exactos del paquete dotnet
+        working-directory: test/fixtures/dotnet
+        run: |
+          mkdir agent1 && cd agent1
+          dotnet new sln -n App
+          dotnet new webapi -n Api -o src/Api
+          dotnet new xunit -n Api.Tests -o tests/Api.Tests
+          dotnet sln add src/Api tests/Api.Tests
+          dotnet add tests/Api.Tests reference src/Api
+          ls -R | head -40
+      - name: Probar el paquete con el SDK real
+        env: { PACKS: dotnet }
+        run: node --import tsx --test test/packs.test.ts
+
+  saas:
+    name: SaaS ${{ matrix.saas }} (SQL + uso completo en Chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        saas: [citafacil, menufacil]
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: anon
+      SUPABASE_SERVICE_ROLE_KEY: x
+      STRIPE_SECRET_KEY: sk_test_x
+      STRIPE_WEBHOOK_SECRET: whsec_x
+      NEXT_PUBLIC_APP_URL: http://localhost:3200
+      NEXT_TELEMETRY_DISABLED: "1"
+    defaults:
+      run:
+        working-directory: generated/${{ matrix.saas }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: "**/package-lock.json" }
+      - run: npm ci
+        working-directory: .
+      - run: npm ci
+      - run: npm run test:sql
+      - if: matrix.saas == 'menufacil'
+        run: npm run test:order
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Arrancar Supabase simulado y la app
+        run: |
+          nohup npm run mock:supabase > mock.log 2>&1 &
+          nohup npx next start -p 3200 > next.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3200/ > /dev/null && curl -s http://localhost:54321/ > /dev/null && break; sleep 1; done
+      - name: Uso completo en Chrome (móvil)
+        env: { SHOTS_DIR: screenshots, CHROME_PATH: /usr/bin/google-chrome }
+        run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-${{ matrix.saas }}
+          path: |
+            generated/${{ matrix.saas }}/screenshots/
+            generated/${{ matrix.saas }}/*.log
+          if-no-files-found: ignore
+          retention-days: 14

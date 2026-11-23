@@ -1,0 +1,1 @@
+{"name":"Saludos","slug":"saludos","summary":"API que saluda.","features":["GET /api/hello"],"acceptance":["mvn verify pasa"]}

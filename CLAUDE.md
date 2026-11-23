@@ -39,6 +39,8 @@ Si el usuario pide un proyecto o un cambio con otro stack, sigue el mismo métod
 
 - Todo lo que sirva a todos los SaaS va a `template/` y se documenta en `template/CONVENTIONS.md`.
 - Comprueba siempre `npx tsc --noEmit` en la raíz y en `template/` (con `npm install` temporal).
+- Ejecuta `npm test` antes de subir cambios a la fábrica: si añades una función, añade su escenario en `test/` (el Claude simulado es `test/fake-claude.mjs`; sus respuestas y los archivos que "escribe" cada llamada están en `test/fixtures/<escenario>/`).
+- Un paquete nuevo en `stacks/` debe pasar `validateStack` (lo comprueba `test/unit.test.ts`); si su toolchain no está aquí, añádelo al CI (`.github/workflows/ci.yml`) con `PACKS=<id>`.
 
 ## Cosas que solo puede hacer el usuario
 

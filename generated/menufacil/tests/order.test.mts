@@ -1,5 +1,6 @@
 import { orderMessage, totals, whatsappLink, money } from "../lib/order.ts";
-const eq = (a: any, b: any, m: string) => console.log(a === b ? "✓" : "✗", m, a === b ? "" : `\n   got: ${a}\n   exp: ${b}`);
+let fails = 0;
+const eq = (a: any, b: any, m: string) => { if (a !== b) fails++; console.log(a === b ? "✓" : "✗", m, a === b ? "" : `\n   got: ${a}\n   exp: ${b}`); };
 const r = { name: "Pica Pollo Ana", currency: "DOP", delivery_fee: 100 };
 const lines = [{ id: "1", name: "Pica pollo 2 piezas", price: 250, qty: 2 }, { id: "2", name: "Refresco", price: 75.5, qty: 1 }];
 eq(money(1234.5, "DOP"), "RD$1,234.50", "formato RD$");
@@ -11,3 +12,5 @@ console.log("---\n" + msg + "\n---");
 eq(msg.includes("2 × Pica pollo 2 piezas — RD$500") && msg.includes("*Total: RD$675.50*") && msg.includes("Delivery a: Calle 5 #12, Naco") && msg.includes("📝 sin cebolla") && msg.includes("👤 Juan"), true, "mensaje completo");
 eq(orderMessage({ restaurant: r, lines, mode: "pickup", customer: "Ana" }).includes("Delivery:"), false, "recoger no muestra delivery");
 eq(whatsappLink("809-555-1234", "hola"), "https://wa.me/18095551234?text=hola", "número RD con prefijo 1");
+console.log(`\n${fails ? fails + " fallidas" : "todas correctas"}`);
+process.exit(fails ? 1 : 0);

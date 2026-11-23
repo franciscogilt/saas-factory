@@ -1,0 +1,1 @@
+{"components":[{"name":"Go (librería estándar)","kind":"backend","folder":".","scaffold":"go mod init conversor","install":"go mod tidy","check":"go vet ./... && go test ./...","dev":"go run .","allowedCommands":["go *"],"conventions":"- Pruebas con testing"}]}

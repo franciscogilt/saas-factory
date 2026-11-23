@@ -1,0 +1,1 @@
+{"name":"Tareas del Equipo","slug":"tareas-equipo","summary":"Lista de tareas compartida.","features":["Crear tareas"],"acceptance":["GET /api/tasks devuelve la lista"]}

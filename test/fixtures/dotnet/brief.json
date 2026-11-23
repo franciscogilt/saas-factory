@@ -1,0 +1,1 @@
+{"name":"Inventario","slug":"inventario","summary":"API de inventario en ASP.NET Core.","features":["API base"],"acceptance":["dotnet build y dotnet test pasan"]}

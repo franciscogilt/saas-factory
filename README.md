@@ -125,7 +125,18 @@ Cada proyecto vive en `projects/<slug>/` con su estado en `.factory/state.json` 
 
 **Seguridad:** el agente solo puede ejecutar `npm`, `npx`, `node`, `tsc` y comandos de lectura, y solo dentro de la carpeta del proyecto. Stripe arranca en modo test: cambia a `sk_live_` solo cuando hayas probado un SaaS de punta a punta.
 
-## 4. Mejorar la fábrica
+## 4. Pruebas
+
+```bash
+npm test          # unitarias + escenarios completos con Claude simulado y compiladores reales (≈2 min)
+npm run test:unit # solo las rápidas
+```
+
+Los escenarios crean proyectos reales (React + FastAPI + PostgreSQL + Docker Compose, Go, una mejora en un repositorio Express) y comprueban seguridad, ramas y que nada generado se versione. Los que necesitan un toolchain que no tienes se saltan solos.
+
+En GitHub, el workflow **CI** lo ejecuta todo en cada cambio y además prueba los paquetes de **Spring Boot** (Java 21 + Maven) y **.NET** (8 y 10), y CitaFácil y MenúFácil completos en Chrome. Los resultados están en la pestaña *Actions*; las capturas de pantalla de los SaaS quedan como artefactos.
+
+## 5. Mejorar la fábrica
 
 La palanca más grande es `template/`: todo lo que añadas ahí (componentes, emails, analítica, panel de admin) lo heredan todos los SaaS futuros. Documenta cada añadido en `template/CONVENTIONS.md` para que los agentes sepan usarlo.
 

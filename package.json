@@ -1,7 +1,7 @@
 {
   "name": "saas-factory",
   "version": "1.0.0",
-  "description": "Fábrica de software autónoma con IA: de idea a SaaS desplegado (Next.js + Supabase + Stripe + Vercel).",
+  "description": "F\u00e1brica de software aut\u00f3noma con IA: de idea a SaaS desplegado (Next.js + Supabase + Stripe + Vercel).",
   "type": "module",
   "private": true,
   "bin": {
@@ -9,7 +9,9 @@
   },
   "scripts": {
     "factory": "tsx src/cli.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test --test-concurrency=1 test/unit.test.ts test/pipeline.test.ts test/packs.test.ts",
+    "test:unit": "node --import tsx --test test/unit.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
