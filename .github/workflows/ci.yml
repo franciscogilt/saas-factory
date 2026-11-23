@@ -72,6 +72,32 @@ jobs:
         env: { PACKS: dotnet }
         run: node --import tsx --test test/packs.test.ts
 
+  paquetes:
+    name: Paquete ${{ matrix.pack }} (creación + instalación + verificación reales)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        pack: [go, nestjs, laravel, flutter]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 24, cache: npm }
+      - if: matrix.pack == 'go'
+        uses: actions/setup-go@v7
+        with: { go-version: "stable", cache: false }
+      - if: matrix.pack == 'laravel'
+        uses: shivammathur/setup-php@v2
+        with: { php-version: "8.3", tools: composer, extensions: "mbstring, pdo_sqlite, sqlite3" }
+      - if: matrix.pack == 'flutter'
+        uses: subosito/flutter-action@v2
+        with: { channel: stable }
+      - run: npm ci
+      - name: Probar el paquete ${{ matrix.pack }}
+        env: { PACKS: "${{ matrix.pack }}" }
+        run: node --import tsx --test test/packs.test.ts
+
   saas:
     name: SaaS ${{ matrix.saas }} (SQL + uso completo en Chrome)
     runs-on: ubuntu-latest

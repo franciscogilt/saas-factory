@@ -6,7 +6,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { checkCommand, FORBIDDEN_COMMANDS } from "./tools.js";
 
-export type Kind = "backend" | "frontend" | "fullstack" | "database" | "infra" | "deploy";
+export type Kind = "backend" | "frontend" | "fullstack" | "mobile" | "database" | "infra" | "deploy";
 
 export interface StackSpec {
   id: string;
@@ -20,6 +20,8 @@ export interface StackSpec {
   templateDir?: string;
   /** Cómo crearlo desde cero (instrucciones para el ingeniero). */
   scaffold?: string;
+  /** Comandos exactos y no interactivos para crearlo, ejecutados dentro de su carpeta (los prueba el CI). */
+  scaffoldCommands?: string[];
   install?: string;
   /** Debe pasar para dar el trabajo por bueno (compilar + pruebas). Se ejecuta dentro de `folder`. */
   check?: string;
@@ -53,7 +55,7 @@ export async function listPacks(): Promise<StackSpec[]> {
   return out.sort((a, b) => order(a.kind) - order(b.kind) || a.id.localeCompare(b.id));
 }
 
-const order = (k: Kind) => ["fullstack", "frontend", "backend", "database", "infra", "deploy"].indexOf(k);
+const order = (k: Kind) => ["fullstack", "frontend", "mobile", "backend", "database", "infra", "deploy"].indexOf(k);
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9#.]+/g, " ").trim();
 
 /** Separa "angular + springboot, postgresql" en piezas y las busca en los paquetes. */
@@ -73,7 +75,7 @@ export async function matchPacks(text: string) {
 
 /** Asigna carpetas: una sola app va en la raíz; frontend + backend van en frontend/ y backend/. */
 export function composeStack(components: StackSpec[]): ProjectStack {
-  const apps = components.filter((c) => ["backend", "frontend", "fullstack"].includes(c.kind));
+  const apps = components.filter((c) => ["backend", "frontend", "fullstack", "mobile"].includes(c.kind));
   const used = new Set<string>();
   for (const c of components) {
     if (c.folder && c.folder !== "auto") continue;
@@ -81,7 +83,7 @@ export function composeStack(components: StackSpec[]): ProjectStack {
       c.kind === "deploy" ? "infra" :
       c.kind === "database" || c.kind === "infra" ? "." :
       apps.length <= 1 ? "." :
-      c.kind === "frontend" ? "frontend" : c.kind === "backend" ? "backend" : c.id;
+      c.kind === "frontend" ? "frontend" : c.kind === "backend" ? "backend" : c.kind === "mobile" ? "mobile" : c.id;
     if (f !== "." && used.has(f)) f = `${f}-${c.id}`;
     used.add(f);
     c.folder = f;

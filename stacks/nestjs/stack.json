@@ -1,0 +1,22 @@
+{
+  "name": "Node.js + NestJS",
+  "kind": "backend",
+  "aliases": [
+    "nest",
+    "nest.js",
+    "nest js"
+  ],
+  "description": "API con NestJS y TypeScript.",
+  "scaffoldCommands": [
+    "npx -y @nestjs/cli@latest new . --package-manager npm --skip-git"
+  ],
+  "scaffold": "Ejecuta `npx -y @nestjs/cli@latest new . --package-manager npm --skip-git` en la carpeta (vacía) del componente.",
+  "install": "npm install --no-audit --no-fund",
+  "check": "npm run build && npm test",
+  "dev": "npm run start:dev",
+  "allowedCommands": [
+    "npm *",
+    "npx *",
+    "node *"
+  ]
+}

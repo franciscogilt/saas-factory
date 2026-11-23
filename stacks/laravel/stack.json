@@ -1,0 +1,20 @@
+{
+  "name": "PHP + Laravel",
+  "kind": "fullstack",
+  "aliases": [
+    "php",
+    "laravel php"
+  ],
+  "description": "Laravel con Composer (API, o web con Blade).",
+  "scaffoldCommands": [
+    "composer create-project laravel/laravel . --no-interaction"
+  ],
+  "scaffold": "Ejecuta `composer create-project laravel/laravel . --no-interaction` en la carpeta (vacía) del componente. Trae `.env` y la clave de la app ya generados.",
+  "install": "composer install --no-interaction",
+  "check": "php artisan test",
+  "dev": "php artisan serve",
+  "allowedCommands": [
+    "composer *",
+    "php *"
+  ]
+}

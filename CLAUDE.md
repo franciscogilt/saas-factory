@@ -3,7 +3,7 @@
 Este repositorio es la fábrica de SaaS de Francisco. Contiene:
 
 - `src/` — la fábrica autónoma (CLI `npm run factory -- …`): agentes ideador, PM, arquitecto, ingeniero, revisor, crecimiento y QA, más el despliegue a GitHub, Supabase, Stripe y Vercel. Para la IA usa la sesión de Claude Code del usuario (`ENGINE=claude-code`, por defecto; `src/claude-code.ts`): **nunca le pidas una clave de API de Anthropic**. Para publicar necesita claves de GitHub, Vercel, Supabase y Stripe en `.env` (ver `.env.example`).
-- `src/generic.ts`, `src/stacks.ts`, `stacks/` — modo **cualquier stack**: `factory new "idea" --stack "angular + springboot + postgresql"` y `factory improve <carpeta> "tarea"` (rama aparte). Paquetes: fastapi, django, dotnet, springboot, express, angular, react, nextjs, postgresql, docker-compose, aws, nextjs-supabase. El usuario trabaja con todos ellos.
+- `src/generic.ts`, `src/stacks.ts`, `stacks/` — modo **cualquier stack**: `factory new "idea" --stack "angular + springboot + postgresql"` y `factory improve <carpeta> "tarea"` (rama aparte). Paquetes: fastapi, django, dotnet, springboot, express, nestjs, go, laravel, angular, react, nextjs, flutter, postgresql, docker-compose, aws, nextjs-supabase. El usuario trabaja con fastapi, django, dotnet, springboot, angular, react, nextjs, express, postgresql, aws y docker-compose; no quiere Vue ni MySQL.
 - `template/` — plantilla base de cada SaaS: Next.js 15 + Supabase + Stripe + Tailwind v4. Lee `template/CONVENTIONS.md` antes de tocarla.
 - `generated/<slug>/` — SaaS ya construidos y probados, listos para `factory deploy`. Ver `generated/README.md`.
 - `tools/supabase-mock.mjs` — Supabase simulado (Auth + PostgREST) sobre Postgres embebido con RLS real, para probar sin cuenta.

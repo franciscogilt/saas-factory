@@ -31,7 +31,7 @@ npm run factory -- stacks             # paquetes disponibles y sus comandos
 npm run factory -- resume <carpeta>   # retoma si se detuvo (límite del plan, error…)
 ```
 
-**Paquetes incluidos** (`stacks/`): `fastapi`, `django`, `dotnet` (.NET/C#), `springboot`, `express` (Node), `angular`, `react`, `nextjs`, `postgresql`, `docker-compose`, `aws` (infraestructura con CDK) y `nextjs-supabase` (la plantilla SaaS). Se reconocen también por alias: "spring boot", ".net", "c#", "node", "postgres", "docker"…
+**Paquetes incluidos** (`stacks/`): `fastapi`, `django`, `dotnet` (.NET/C#), `springboot`, `express` (Node), `nestjs`, `go`, `laravel` (PHP), `angular`, `react`, `nextjs`, `flutter` (app móvil, va en `mobile/`), `postgresql`, `docker-compose`, `aws` (infraestructura con CDK) y `nextjs-supabase` (la plantilla SaaS). Se reconocen también por alias: "spring boot", ".net", "c#", "node", "nest", "golang", "php", "app móvil", "postgres", "docker"…
 
 **Qué hace `new`:** define el alcance → resuelve el stack (paquetes + IA para lo que no tenga paquete) → **te muestra los comandos y te pide confirmación** → crea el proyecto (frontend y backend en `frontend/` y `backend/` si hay ambos) → planifica → programa → revisa (seguridad, pruebas, completitud) → instala y ejecuta la verificación de cada componente hasta que todo pase → primer commit. Deja un `CLAUDE.md` y un `factory.stack.json` para que futuros cambios sepan cómo trabajar.
 
@@ -134,7 +134,7 @@ npm run test:unit # solo las rápidas
 
 Los escenarios crean proyectos reales (React + FastAPI + PostgreSQL + Docker Compose, Go, una mejora en un repositorio Express) y comprueban seguridad, ramas y que nada generado se versione. Los que necesitan un toolchain que no tienes se saltan solos.
 
-En GitHub, el workflow **CI** lo ejecuta todo en cada cambio y además prueba los paquetes de **Spring Boot** (Java 21 + Maven) y **.NET** (8 y 10), y CitaFácil y MenúFácil completos en Chrome. Los resultados están en la pestaña *Actions*; las capturas de pantalla de los SaaS quedan como artefactos.
+En GitHub, el workflow **CI** lo ejecuta todo en cada cambio y además prueba con sus herramientas reales los paquetes de **Spring Boot** (Java 21 + Maven), **.NET** (8 y 10), **Go**, **NestJS**, **Laravel** (PHP + Composer) y **Flutter**, y CitaFácil y MenúFácil completos en Chrome. Los resultados están en la pestaña *Actions*; las capturas de pantalla de los SaaS quedan como artefactos.
 
 ## 5. Mejorar la fábrica
 

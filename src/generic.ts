@@ -122,7 +122,7 @@ const componentSchema = {
   properties: {
     packId: { type: "string", description: "id de un paquete existente si encaja; vacío si es un componente propio" },
     name: { type: "string" },
-    kind: { type: "string", enum: ["backend", "frontend", "fullstack", "database", "infra", "deploy"] },
+    kind: { type: "string", enum: ["backend", "frontend", "fullstack", "mobile", "database", "infra", "deploy"] },
     folder: { type: "string", description: "carpeta relativa del componente ('.' = raíz)" },
     scaffold: { type: "string", description: "cómo crearlo desde cero (solo proyectos nuevos)" },
     install: { type: "string" },
@@ -218,7 +218,9 @@ async function planTasks(s: GState, budget: Budget): Promise<GTask[]> {
     prompt:
       `${s.mode === "new" ? `Proyecto nuevo: ${s.brief!.name} — ${s.brief!.summary}\nFuncionalidades:\n- ${s.brief!.features.join("\n- ")}\nCriterios de aceptación:\n- ${s.brief!.acceptance.join("\n- ")}` : `Tarea en un proyecto existente: ${s.goal}`}\n\n` +
       `STACK:\n${stackBrief(s.stack!)}\n` +
-      s.stack!.components.filter((c) => c.scaffold && !c.templateDir).map((c) => `Cómo crear ${c.name} (carpeta ${c.folder}): ${c.scaffold}`).join("\n") +
+      s.stack!.components.filter((c) => (c.scaffold || c.scaffoldCommands) && !c.templateDir).map((c) =>
+        `Cómo crear ${c.name} (carpeta ${c.folder}): ${c.scaffold ?? ""}` +
+        (c.scaffoldCommands?.length ? `\n  Comandos exactos, dentro de la carpeta ${c.folder}: ${c.scaffoldCommands.map((x) => `\`${x}\``).join(", ")}` : "")).join("\n") +
       `\n\n${await snapshot(s.root)}`,
     schema: {
       type: "object",
@@ -343,7 +345,7 @@ async function pipeline(s: GState, opts: GOptions, budget: Budget) {
           log(`Plantilla: copiando ${c.name} en ${c.folder}…`);
           await cp(c.templateDir!, resolve(s.root, c.folder ?? "."), { recursive: true, filter: (src) => !/node_modules|\.next|\.venv|__pycache__/.test(src) });
         }
-        const declared: ProjectStack = { components: s.stack!.components.map(({ templateDir, scaffold, ...c }) => c) };
+        const declared: ProjectStack = { components: s.stack!.components.map(({ templateDir, scaffold, scaffoldCommands, ...c }) => c) };
         await writeFile(join(s.root, STACK_FILE), JSON.stringify(declared, null, 2) + "\n");
         if (!existsSync(join(s.root, "CLAUDE.md"))) await writeFile(join(s.root, "CLAUDE.md"), claudeMd(s));
         if ((await git("rev-parse --is-inside-work-tree", s.root)).code !== 0) await git("init -q -b main", s.root);

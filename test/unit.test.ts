@@ -30,10 +30,10 @@ test("permisos: los prohibidos ganan aunque el stack los pida", () => {
   ] as [string, string[]][]) assert.ok(!allows(cmd, allowed), cmd);
 });
 
-test("paquetes: los 12 existen y todos pasan la validación de seguridad", async () => {
+test("paquetes: los 16 existen y todos pasan la validación de seguridad", async () => {
   const packs = await listPacks();
   const ids = packs.map((p) => p.id).sort();
-  for (const id of ["angular", "aws", "django", "docker-compose", "dotnet", "express", "fastapi", "nextjs", "nextjs-supabase", "postgresql", "react", "springboot"])
+  for (const id of ["angular", "aws", "django", "docker-compose", "dotnet", "express", "fastapi", "flutter", "go", "laravel", "nestjs", "nextjs", "nextjs-supabase", "postgresql", "react", "springboot"])
     assert.ok(ids.includes(id), `falta el paquete ${id}`);
   for (const p of packs) assert.doesNotThrow(() => validateStack({ components: [{ ...p, folder: "." }] }), p.id);
 });
@@ -44,14 +44,20 @@ test("paquetes: alias y combinaciones del usuario", async () => {
   assert.deepEqual(await ids("spring boot + postgres"), ["springboot", "postgresql"]);
   assert.deepEqual(await ids("node con express"), ["express"]);
   assert.deepEqual(await ids("FastAPI"), ["fastapi"]);
-  const { unmatched } = await matchPacks("laravel + mysql");
-  assert.deepEqual(unmatched, ["laravel", "mysql"]);
+  assert.deepEqual(await ids("golang"), ["go"]);
+  assert.deepEqual(await ids("nest.js"), ["nestjs"]);
+  assert.deepEqual(await ids("php"), ["laravel"]);
+  assert.deepEqual(await ids("app móvil"), ["flutter"]);
+  const { matched, unmatched } = await matchPacks("laravel + mysql");
+  assert.deepEqual([matched.map((m) => m.id), unmatched], [["laravel"], ["mysql"]]);
 });
 
 test("paquetes: carpetas al combinar frontend, backend, base de datos, infraestructura y AWS", async () => {
   const s = composeStack((await matchPacks("angular + springboot + postgresql + docker-compose + aws")).matched);
   const at = Object.fromEntries(s.components.map((c) => [c.id, c.folder]));
   assert.deepEqual(at, { angular: "frontend", springboot: "backend", postgresql: ".", "docker-compose": ".", aws: "infra" });
+  const movil = composeStack((await matchPacks("flutter + nestjs + postgresql")).matched);
+  assert.deepEqual(Object.fromEntries(movil.components.map((c) => [c.id, c.folder])), { flutter: "mobile", nestjs: "backend", postgresql: "." });
   const solo = composeStack((await matchPacks("fastapi")).matched);
   assert.equal(solo.components[0].folder, ".", "una sola app va en la raíz");
 });

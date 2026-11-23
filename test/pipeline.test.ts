@@ -23,8 +23,8 @@ test("new: React + FastAPI + PostgreSQL (+ Docker Compose) con verificaciones re
   assert.deepEqual(stackFile.components.map((c: any) => c.folder).slice(0, 2), ["frontend", "backend"]);
 });
 
-test("new: stack sin paquete (Go); QA detecta la prueba que falla y la hace corregir", { timeout: 10 * MIN, skip: !has("go") && "falta go" }, async () => {
-  const r = await factory(["new", "Conversor de temperaturas", "--stack", "Go con la librería estándar", "--yes"], { fake: "go", env: { ANTHROPIC_API_KEY: "sk-olvidada" } });
+test("new: stack sin paquete (lo resuelve la IA); QA detecta la prueba que falla y la hace corregir", { timeout: 10 * MIN, skip: !has("go") && "falta go" }, async () => {
+  const r = await factory(["new", "Conversor de temperaturas", "--stack", "lenguaje Go sin frameworks", "--yes"], { fake: "go", env: { ANTHROPIC_API_KEY: "sk-olvidada" } });
   assert.equal(r.code, 0, r.out.slice(-2000));
   assert.match(r.out, /QA ❌ ronda 1/);
   assert.match(r.out, /QA ✅/);

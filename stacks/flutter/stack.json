@@ -1,0 +1,22 @@
+{
+  "name": "Flutter",
+  "kind": "mobile",
+  "aliases": [
+    "dart",
+    "flutter mobile",
+    "app movil",
+    "app móvil"
+  ],
+  "description": "App móvil (Android/iOS) con Flutter y Dart.",
+  "scaffoldCommands": [
+    "flutter create --org com.example --project-name app ."
+  ],
+  "scaffold": "Ejecuta `flutter create --org com.example --project-name app .` en la carpeta del componente.",
+  "install": "flutter pub get",
+  "check": "flutter analyze && flutter test",
+  "dev": "flutter run",
+  "allowedCommands": [
+    "flutter *",
+    "dart *"
+  ]
+}
