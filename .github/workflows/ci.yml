@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version: "1.22", cache: false }
       - run: npm ci
       - run: npx tsc --noEmit
@@ -33,10 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with: { distribution: temurin, java-version: "21", cache: maven }
       - run: npm ci
       - name: Probar el paquete con Maven real
@@ -52,10 +52,10 @@ jobs:
       matrix:
         dotnet: ["8.0.x", "10.0.x"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with: { dotnet-version: "${{ matrix.dotnet }}" }
       - run: npm ci
       - name: Crear el proyecto con los comandos exactos del paquete dotnet
@@ -92,8 +92,8 @@ jobs:
       run:
         working-directory: generated/${{ matrix.saas }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm, cache-dependency-path: "**/package-lock.json" }
       - run: npm ci
         working-directory: .
@@ -112,7 +112,7 @@ jobs:
         env: { SHOTS_DIR: screenshots, CHROME_PATH: /usr/bin/google-chrome }
         run: npm run test:e2e
       - if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: capturas-${{ matrix.saas }}
           path: |

@@ -42,7 +42,7 @@ jobs:
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       MAX_TOKENS_PER_PROJECT: ${{ vars.MAX_TOKENS_PER_PROJECT || '8000000' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # La ejecución programada se pausa (sin fallar ni enviarte correos de error) mientras falte configuración.
       # Si la lanzas a mano, sigue siempre, para que "Revisar claves" te diga exactamente qué falta.
@@ -67,7 +67,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.cfg.outputs.ready == 'true'
         with: { node-version: 22, cache: npm }
       - run: npm ci
@@ -101,7 +101,7 @@ jobs:
 
       - name: Guardar estado, registros y kits de lanzamiento
         if: ${{ always() && steps.cfg.outputs.ready == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: factory-${{ github.run_id }}
           path: |
@@ -121,7 +121,7 @@ jobs:
 
       - name: Subir código generado
         if: ${{ always() && steps.cfg.outputs.ready == 'true' && inputs.mode == 'probar-sin-publicar' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: saas-generado-${{ github.run_id }}
           path: out/*.zip
