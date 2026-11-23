@@ -52,8 +52,14 @@ export async function loadState(slug: string): Promise<ProjectState | null> {
 export async function saveState(s: ProjectState) {
   s.updatedAt = new Date().toISOString();
   await mkdir(join(projectDir(s.slug), ".factory"), { recursive: true });
-  await writeFile(stateFile(s.slug), JSON.stringify(s, null, 2));
+  await writeFile(stateFile(s.slug), JSON.stringify(s, SECRET_FREE, 2));
 }
+
+// Las claves secretas solo viven en memoria durante el despliegue: state.json se sube como artefacto
+// de GitHub Actions (visible para cualquiera en un repo público) y puede acabar en un commit.
+// Cada despliegue las vuelve a pedir a Supabase/Stripe.
+export const SECRET_STATE_KEYS = ["serviceKey", "webhookSecret"];
+const SECRET_FREE = (key: string, value: unknown) => (SECRET_STATE_KEYS.includes(key) ? undefined : value);
 
 export function newState(slug: string, idea: string): ProjectState {
   const now = new Date().toISOString();

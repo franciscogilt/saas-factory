@@ -4,6 +4,10 @@
 #              FACTORY_GITHUB_TOKEN, VERCEL_TOKEN, SUPABASE_ACCESS_TOKEN, STRIPE_SECRET_KEY
 #   (Opcional: ANTHROPIC_API_KEY + variable FACTORY_ENGINE=api si prefieres pagar por tokens.)
 #   Variables: FACTORY_NICHE, FACTORY_GITHUB_OWNER, SUPABASE_ORG_ID (y VERCEL_TEAM_ID si usas equipo)
+#   STRIPE_SECRET_KEY es opcional: sin ella se publica sin cobros (planes de pago «Próximamente»).
+#
+# Modo «publicar»: sube un SaaS ya construido de generated/<slug> (p. ej. menufacil) sin usar Claude.
+# Se puede repetir: reutiliza el repositorio, la base de datos y el proyecto de Vercel ya creados.
 name: SaaS Factory
 
 on:
@@ -14,7 +18,7 @@ on:
       mode:
         description: "Qué hacer"
         type: choice
-        options: [lanzar, probar-sin-publicar, solo-revisar-claves]
+        options: [lanzar, publicar, probar-sin-publicar, solo-revisar-claves]
         default: lanzar
       niche:
         description: "Nicho (vacío = usa la variable FACTORY_NICHE)"
@@ -22,6 +26,9 @@ on:
       count:
         description: "Cuántos SaaS lanzar"
         default: "2"
+      slug:
+        description: "Modo publicar: qué SaaS ya construido (carpeta de generated/)"
+        default: "menufacil"
 
 concurrency: saas-factory
 
@@ -41,6 +48,8 @@ jobs:
       SUPABASE_ORG_ID: ${{ vars.SUPABASE_ORG_ID }}
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       MAX_TOKENS_PER_PROJECT: ${{ vars.MAX_TOKENS_PER_PROJECT || '8000000' }}
+      DEMO_WHATSAPP: ${{ vars.DEMO_WHATSAPP }}
+      MODE: ${{ inputs.mode || 'lanzar' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -52,10 +61,12 @@ jobs:
           NICHE: ${{ inputs.niche || vars.FACTORY_NICHE }}
         run: |
           missing=""
-          if [ "$ENGINE" = "api" ]; then [ -n "$ANTHROPIC_API_KEY" ] || missing="$missing ANTHROPIC_API_KEY"
-          else [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || missing="$missing CLAUDE_CODE_OAUTH_TOKEN"; fi
-          [ -n "$NICHE" ] || missing="$missing FACTORY_NICHE"
-          for v in GITHUB_TOKEN GITHUB_OWNER VERCEL_TOKEN SUPABASE_ACCESS_TOKEN SUPABASE_ORG_ID STRIPE_SECRET_KEY; do
+          if [ "$MODE" != "publicar" ]; then
+            if [ "$ENGINE" = "api" ]; then [ -n "$ANTHROPIC_API_KEY" ] || missing="$missing ANTHROPIC_API_KEY"
+            else [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || missing="$missing CLAUDE_CODE_OAUTH_TOKEN"; fi
+            [ -n "$NICHE" ] || missing="$missing FACTORY_NICHE"
+          fi
+          for v in GITHUB_TOKEN GITHUB_OWNER VERCEL_TOKEN SUPABASE_ACCESS_TOKEN SUPABASE_ORG_ID; do
             [ -n "${!v}" ] || missing="$missing $v"
           done
           if [ -n "$missing" ] && [ "${{ github.event_name }}" = "schedule" ]; then
@@ -73,15 +84,29 @@ jobs:
       - run: npm ci
         if: steps.cfg.outputs.ready == 'true'
       - name: Instalar Claude Code
-        if: ${{ steps.cfg.outputs.ready == 'true' && vars.FACTORY_ENGINE != 'api' }}
+        if: ${{ steps.cfg.outputs.ready == 'true' && vars.FACTORY_ENGINE != 'api' && inputs.mode != 'publicar' }}
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Revisar claves
         if: steps.cfg.outputs.ready == 'true'
-        run: npm run -s factory -- doctor ${{ inputs.mode == 'probar-sin-publicar' && '--ai-only' || '' }}
+        run: npm run -s factory -- doctor ${{ inputs.mode == 'probar-sin-publicar' && '--ai-only' || inputs.mode == 'publicar' && '--no-ai' || '' }}
+
+      - name: Publicar un SaaS ya construido
+        if: ${{ steps.cfg.outputs.ready == 'true' && inputs.mode == 'publicar' }}
+        env:
+          SLUG: ${{ inputs.slug }}
+        run: |
+          if ! [[ "$SLUG" =~ ^[a-z0-9][a-z0-9-]*$ ]] || [ ! -f "generated/$SLUG/.factory/state.json" ]; then
+            echo "::error::No hay ningún SaaS listo en generated/$SLUG. Disponibles: $(ls generated | grep -v README | tr '\n' ' ')"; exit 1
+          fi
+          mkdir -p projects
+          rsync -a --exclude node_modules --exclude .next --exclude screenshots "generated/$SLUG/" "projects/$SLUG/"
+          git config --global user.email "factory@saas.local"
+          git config --global user.name "SaaS Factory"
+          npm run -s factory -- deploy "$SLUG" --seed
 
       - name: Ejecutar la fábrica
-        if: ${{ steps.cfg.outputs.ready == 'true' && inputs.mode != 'solo-revisar-claves' }}
+        if: ${{ steps.cfg.outputs.ready == 'true' && inputs.mode != 'solo-revisar-claves' && inputs.mode != 'publicar' }}
         env:
           NICHE: ${{ inputs.niche || vars.FACTORY_NICHE }}
           COUNT: ${{ inputs.count || '2' }}

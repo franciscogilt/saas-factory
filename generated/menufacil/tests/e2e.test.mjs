@@ -27,6 +27,12 @@ await p.goto(BASE + "/");
 ok((await p.textContent("h1")).includes("Los pedidos, en tu WhatsApp"), "landing con el titular del PRD");
 await p.screenshot({ path: `${OUT}/1-landing.png`, fullPage: true });
 
+// ── Precios publicados sin Stripe (sin STRIPE_PRICE_PRO): el plan de pago no se puede contratar todavía
+await p.goto(BASE + "/pricing");
+const soon = p.locator("button", { hasText: "Próximamente" });
+ok(process.env.STRIPE_PRICE_PRO ? true : (await soon.count()) === 1 && (await soon.isDisabled()), "sin Stripe, el plan Pro dice «Próximamente» y no abre el pago");
+await p.screenshot({ path: `${OUT}/1b-precios.png`, fullPage: true });
+
 // ── Dueña: alta del negocio
 const ownerCtx = await browser.newContext(mobile);
 await ownerCtx.addCookies(authCookie);

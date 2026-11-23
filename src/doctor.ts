@@ -10,7 +10,7 @@ async function get(url: string, headers: Record<string, string>) {
 }
 
 /** Comprueba que cada clave existe, es válida y tiene los permisos necesarios. */
-export async function doctor(aiOnly = false): Promise<boolean> {
+export async function doctor(aiOnly = false, ai = true): Promise<boolean> {
   const checks: Check[] = [];
   const run = async (name: string, value: string | undefined, how: string, fn: () => Promise<string>) => {
     if (!value) return checks.push({ name, ok: false, detail: `Falta. ${how}` });
@@ -21,7 +21,9 @@ export async function doctor(aiOnly = false): Promise<boolean> {
     }
   };
 
-  if (config.engine === "claude-code") {
+  if (!ai) {
+    // Publicar un SaaS ya construido no usa Claude.
+  } else if (config.engine === "claude-code") {
     await run("Claude (tu sesión de Claude Code)", "sesión", "Instala Claude Code (`npm i -g @anthropic-ai/claude-code`) y entra con `claude` usando tu plan. En GitHub Actions: secreto CLAUDE_CODE_OAUTH_TOKEN (genéralo con `claude setup-token`)", async () => {
       const answer = await ccPing(new Budget(1_000_000));
       if (!/ok/i.test(answer)) throw new Error(`Respuesta inesperada: ${answer.slice(0, 80)}`);
@@ -65,7 +67,9 @@ export async function doctor(aiOnly = false): Promise<boolean> {
     return `organización "${org.name}" · ${n} proyecto(s) existentes${n >= 2 ? " · ⚠️ el plan gratis solo permite 2 activos" : ""}`;
   });
 
-  await run("Stripe (STRIPE_SECRET_KEY)", config.stripe.key, "Cópiala en dashboard.stripe.com/test/apikeys", async () => {
+  if (!config.stripe.key)
+    checks.push({ name: "Stripe (STRIPE_SECRET_KEY)", ok: true, detail: "⚪ Sin configurar (opcional): se publica sin cobros y los planes de pago dicen «Próximamente»." });
+  else await run("Stripe (STRIPE_SECRET_KEY)", config.stripe.key, "Cópiala en dashboard.stripe.com/test/apikeys", async () => {
     const r = await get("https://api.stripe.com/v1/balance", { Authorization: `Bearer ${config.stripe.key}` });
     if (!r.ok) throw new Error(`Clave rechazada (${r.status})`);
     return config.stripe.key!.startsWith("sk_live") ? "⚠️ MODO LIVE: cobrará dinero real" : "modo test";

@@ -24,6 +24,9 @@ export default async function PricingPage() {
               <div className="mt-8">
                 {p.priceUsd === 0 ? (
                   <LinkButton href={user ? "/dashboard" : "/login"} variant="secondary" className="w-full">Empezar gratis</LinkButton>
+                ) : !p.priceId ? (
+                  // Publicado sin Stripe: el plan se enseña, pero aún no se puede contratar.
+                  <Button className="w-full" variant="secondary" disabled>Próximamente</Button>
                 ) : (
                   <form action="/api/stripe/checkout" method="post">
                     <input type="hidden" name="plan" value={p.id} />

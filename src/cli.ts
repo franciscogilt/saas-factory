@@ -116,13 +116,14 @@ program
 
 program
   .command("deploy")
-  .description("Despliega un SaaS ya construido")
+  .description("Despliega un SaaS ya construido (se puede repetir: reutiliza lo que ya exista)")
   .argument("<slug>")
-  .action(async (slug) => {
+  .option("--seed", "después de publicar, ejecuta `npm run seed:demo` del proyecto (datos de demostración)")
+  .action(async (slug, o) => {
     const s = await loadState(slug);
     if (!s) throw new Error("No existe ese proyecto");
     const log = logger(slug);
-    await deployAll(s, projectDir(slug), log);
+    await deployAll(s, projectDir(slug), log, { seed: o.seed });
     s.stage = (await smokeTest(s, log)) ? "done" : "verify";
     await saveState(s);
   });
@@ -168,7 +169,8 @@ program
   .command("doctor")
   .description("Comprueba que todas las claves están bien configuradas")
   .option("--ai-only", "solo la clave de Claude (para el modo de prueba sin publicar)")
-  .action(async (o) => { if (!(await doctor(o.aiOnly))) process.exit(1); });
+  .option("--no-ai", "sin Claude (para publicar un SaaS ya construido)")
+  .action(async (o) => { if (!(await doctor(o.aiOnly, o.ai))) process.exit(1); });
 
 program
   .command("dashboard")

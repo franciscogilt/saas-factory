@@ -4,6 +4,7 @@
 - `app/` — rutas (App Router). Server Components por defecto; usa `"use client"` solo si hay interactividad.
 - `app/dashboard/` — área privada. El layout ya exige sesión: cualquier página nueva dentro está protegida.
 - `app/api/stripe/*` — checkout, portal de cliente y webhook. Ya funcionan: no los reescribas.
+- Stripe es opcional al publicar: si un plan de pago no tiene `priceId` (no hay `STRIPE_SECRET_KEY`), `/pricing` lo enseña con un botón «Próximamente» desactivado. Cualquier botón nuevo de compra debe respetar esa misma condición.
 - `lib/product.ts` — nombre, copy de la landing, funcionalidades y planes. Fuente única de verdad del producto.
 - `lib/supabase/server.ts` → `createClient()` para Server Components, Server Actions y Route Handlers.
 - `lib/supabase/client.ts` → `createClient()` para Client Components.

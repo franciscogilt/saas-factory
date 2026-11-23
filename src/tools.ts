@@ -47,9 +47,9 @@ export function checkCommand(command: string, allowed: string[]) {
     throw new Error(`Comando no permitido. Permitidos: ${[...BASE_COMMANDS, ...allowed].map(prefixOf).join(", ")}.`);
 }
 
-export function sh(cmd: string, cwd: string, timeoutMs = 15 * 60_000): Promise<{ code: number; out: string }> {
+export function sh(cmd: string, cwd: string, timeoutMs = 15 * 60_000, extraEnv: Record<string, string> = {}): Promise<{ code: number; out: string }> {
   return new Promise((res) => {
-    const p = spawn(cmd, { cwd, shell: true, env: { ...process.env, ...PLACEHOLDER_ENV, CI: "1", NEXT_TELEMETRY_DISABLED: "1" } });
+    const p = spawn(cmd, { cwd, shell: true, env: { ...process.env, ...PLACEHOLDER_ENV, CI: "1", NEXT_TELEMETRY_DISABLED: "1", ...extraEnv } });
     let out = "";
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (out += d));

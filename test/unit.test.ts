@@ -71,3 +71,20 @@ test("validación: rechaza stacks peligrosos propuestos por la IA", () => {
   assert.throws(() => validateStack({ components: [{ ...base, folder: "../fuera" }] }), /Carpeta no válida/);
   assert.doesNotThrow(() => validateStack({ components: [{ ...base, check: "go vet ./... && go test ./..." }] }));
 });
+
+test("estado: las claves secretas nunca se escriben en state.json", async () => {
+  const { newState, saveState, loadState, projectDir } = await import("../src/state.ts");
+  const { rm } = await import("node:fs/promises");
+  const s = newState(`zz-prueba-secretos-${process.pid}`, "x");
+  s.deploy = { supabaseUrl: "https://abc.supabase.co", anonKey: "anon-publica", serviceKey: "service-SECRETA", webhookSecret: "whsec_SECRETA" };
+  try {
+    await saveState(s);
+    const back = await loadState(s.slug);
+    assert.equal(back?.deploy.anonKey, "anon-publica");
+    assert.equal(back?.deploy.serviceKey, undefined);
+    assert.equal(back?.deploy.webhookSecret, undefined);
+    assert.equal(s.deploy.serviceKey, "service-SECRETA", "en memoria se conserva para el despliegue en curso");
+  } finally {
+    await rm(projectDir(s.slug), { recursive: true, force: true });
+  }
+});
